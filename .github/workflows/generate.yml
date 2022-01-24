@@ -158,6 +158,20 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
 
+      - name: Push Dart files
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_file: 'm3o-dart/'
+          destination_repo: 'lambdaR/GWT-m3o-dart'
+          destination_branch: ${{ steps.extract_branch.outputs.branch }}
+          git_server: 'github.com'
+          user_name: 'lambdaR'
+          use_rsync: true
+          commit_message: 'Commit from lambdaR/GWT-m3o action'
+          
       - name: Push Go files
         uses: dmnemec/copy_file_to_another_repo_action@main
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
