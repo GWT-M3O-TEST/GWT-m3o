@@ -18,6 +18,12 @@ jobs:
           go-version: 1.13
         id: go
 
+      - name: Set up dart latest
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk:  stable
+        id: dart
+
       - name: Install Protoc
         uses: arduino/setup-protoc@master
 
@@ -45,6 +51,20 @@ jobs:
         with:
           repository: 'lambdaR/GWT-m3o-go'
           path: m3o-go
+
+      - name: Check m3o-dart repo
+        uses: actions/checkout@v2
+        with:
+          repository: 'lambdaR/GWT-m3o-dart'
+          path: m3o-dart
+
+      - name: Install dependencies m3o-dart
+        working-directory: m3o-dart
+        run:  dart pub get
+
+      - name: format m3o-dart
+        working-directory: m3o-dart
+        run:  dart format .
 
       - name: Enable caching
         uses: actions/cache@v2
@@ -115,6 +135,10 @@ jobs:
           #  move the js examples
           mkdir clients/ts/examples
           mv examples/js/* clients/ts/examples/
+          # sync the clients to m3o-dart/
+          rsync -avz clients/dart/ ../m3o-dart/
+          # sync the examples to m3o-dart/examples
+          rsync -avz examples/dart/ ../m3o-dart/example/
 
       - name: Gofmt and test
         working-directory: m3o-go
