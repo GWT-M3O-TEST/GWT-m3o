@@ -117,7 +117,7 @@ jobs:
       - name: Install dependencies m3o-dart
         working-directory: m3o-dart
         run:  dart pub get
-        
+
       - name: format m3o-dart
         working-directory: m3o-dart
         run:  dart format .
@@ -167,8 +167,8 @@ jobs:
           source_file: 'm3o-go/'
           destination_repo: 'lambdaR/GWT-m3o-go'
           destination_branch: ${{ steps.extract_branch.outputs.branch }}
-          github_server: 'github.com'
-          user_name: 'GWT-m3o-actions'
+          git_server: 'github.com'
+          user_name: 'lambdaR'
           use_rsync: true
           commit_message: 'Commit from lambdaR/GWT-m3o action'
 
@@ -181,8 +181,8 @@ jobs:
           source_file: 'services/clients/ts/'
           destination_repo: 'lambdaR/GWT-m3o-js'
           destination_branch: ${{ steps.extract_branch.outputs.branch }}
-          github_server: 'github.com'
-          user_name: 'GWT-m3o-actions'
+          git_server: 'github.com'
+          user_name: 'lambdaR'
           use_rsync: true
           commit_message: 'Commit from lambdaR/GWT-m3o action'
 
