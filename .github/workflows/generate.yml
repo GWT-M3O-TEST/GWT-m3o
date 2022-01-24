@@ -58,14 +58,6 @@ jobs:
           repository: 'lambdaR/GWT-m3o-dart'
           path: m3o-dart
 
-      - name: Install dependencies m3o-dart
-        working-directory: m3o-dart
-        run:  dart pub get
-
-      - name: format m3o-dart
-        working-directory: m3o-dart
-        run:  dart format .
-
       - name: Enable caching
         uses: actions/cache@v2
         with:
@@ -121,6 +113,18 @@ jobs:
       #   run: |
       #     rm -rf clients examples
       #     client-gen .
+
+      - name: Install dependencies m3o-dart
+        working-directory: m3o-dart
+        run:  dart pub get
+        
+      - name: format m3o-dart
+        working-directory: m3o-dart
+        run:  dart format .
+
+      - name: run generate Freezed m3o-dart
+        working-directory: m3o-dart
+        run:  dart pub run build_runner build --delete-conflicting-outputs
 
       - name: Adjust generated things before pushing
         working-directory: services
