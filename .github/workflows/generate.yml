@@ -95,7 +95,7 @@ jobs:
         run: |
           sudo npm install -g prettier
 
-      - name: Generate Go and JS packages
+      - name: Generate Go, JS and Dart packages
         working-directory: services
         if: github.ref == 'refs/heads/main'
         # env:
@@ -113,18 +113,6 @@ jobs:
       #   run: |
       #     rm -rf clients examples
       #     client-gen .
-
-      - name: Install dependencies m3o-dart
-        working-directory: m3o-dart
-        run:  dart pub get
-
-      - name: format m3o-dart
-        working-directory: m3o-dart
-        run:  dart format .
-
-      - name: run generate Freezed m3o-dart
-        working-directory: m3o-dart
-        run:  dart pub run build_runner build --delete-conflicting-outputs
 
       - name: Adjust generated things before pushing
         working-directory: services
@@ -152,26 +140,23 @@ jobs:
           go fmt ./...
           go test -v ./...
 
+      - name: Install dependencies m3o-dart
+        working-directory: m3o-dart
+        run:  dart pub get
+
+      - name: format m3o-dart
+        working-directory: m3o-dart
+        run:  dart format .
+
+      - name: run generate Freezed m3o-dart
+        working-directory: m3o-dart
+        run:  dart pub run build_runner build --delete-conflicting-outputs
+
       # https://stackoverflow.com/questions/58033366/how-to-get-current-branch-within-github-actions
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
-
-      - name: Push Go files
-        uses: dmnemec/copy_file_to_another_repo_action@main
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          source_file: 'm3o-go/'
-          destination_repo: 'lambdaR/GWT-m3o-go'
-          destination_branch: ${{ steps.extract_branch.outputs.branch }}
-          git_server: 'github.com'
-          user_email:  'danieljoudat@gmail.com'
-          user_name: 'lambdaR'
-          use_rsync: true
-          commit_message: 'Commit from lambdaR/GWT-m3o action'
 
       - name: Push Dart files
         uses: dmnemec/copy_file_to_another_repo_action@main
@@ -181,6 +166,21 @@ jobs:
         with:
           source_file: 'm3o-dart/'
           destination_repo: 'lambdaR/GWT-m3o-dart'
+          destination_branch: ${{ steps.extract_branch.outputs.branch }}
+          git_server: 'github.com'
+          user_email:  'danieljoudat@gmail.com'
+          user_name: 'lambdaR'
+          use_rsync: true
+          commit_message: 'Commit from lambdaR/GWT-m3o action'
+          
+      - name: Push Go files
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_file: 'm3o-go/'
+          destination_repo: 'lambdaR/GWT-m3o-go'
           destination_branch: ${{ steps.extract_branch.outputs.branch }}
           git_server: 'github.com'
           user_email:  'danieljoudat@gmail.com'
