@@ -98,7 +98,7 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 		}
 	}
 
-	output := []string{"{"}
+	output := []string{}
 	protoMessage := schemas[typeName]
 
 	// return an empty string if there is no properties for the typeName
@@ -183,7 +183,7 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 
 	}
 
-	res := strings.Join(output, ", ") + ",}"
+	res := "{" + strings.Join(output, ", ") + ",}"
 	return res
 }
 
