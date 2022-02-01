@@ -170,7 +170,7 @@ jobs:
           destination_branch: ${{ steps.extract_branch.outputs.branch }}
           git_server: 'github.com'
           user_email:  'danieljoudat@gmail.com'
-          user_name: 'm3oaction'
+          user_name: 'lambdaR'
           use_rsync: true
           commit_message: 'Commit from GWT-M3O-TEST/GWT-m3o action'
           
@@ -185,7 +185,7 @@ jobs:
           destination_branch: ${{ steps.extract_branch.outputs.branch }}
           git_server: 'github.com'
           user_email:  'danieljoudat@gmail.com'
-          user_name: 'm3oaction'
+          user_name: 'lambdaR'
           use_rsync: true
           commit_message: 'Commit from GWT-M3O-TEST/GWT-m3o action'
 
@@ -200,10 +200,10 @@ jobs:
           destination_branch: ${{ steps.extract_branch.outputs.branch }}
           git_server: 'github.com'
           user_email:  'danieljoudat@gmail.com'
-          user_name: 'm3oaction'
+          user_name: 'lambdaR'
           use_rsync: true
           commit_message: 'Commit from GWT-M3O-TEST/GWT-m3o action'
-
+      
       # - name: Push shell files
       #   uses: dmnemec/copy_file_to_another_repo_action@main
       #   if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
