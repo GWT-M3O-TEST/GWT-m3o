@@ -129,9 +129,9 @@ jobs:
           mkdir clients/ts/examples
           mv examples/js/* clients/ts/examples/
           # sync the clients to m3o-dart/
-          rsync -avz clients/dart/ ../m3o-dart/
-          # sync the examples to m3o-dart/examples
-          rsync -avz examples/dart/ ../m3o-dart/example/
+          rsync -avz clients/dart/* ../m3o-dart/
+          # sync the examples to m3o-dart/example
+          rsync -avz examples/dart/* ../m3o-dart/example/
 
       - name: Gofmt and test
         working-directory: m3o-go
@@ -157,7 +157,7 @@ jobs:
         working-directory: m3o-dart
         run: |
           rm -rf .dart_tool .git .gitignore .packages pubspec.lock
-          
+
       # https://stackoverflow.com/questions/58033366/how-to-get-current-branch-within-github-actions
       - name: Extract branch name
         shell: bash
@@ -194,15 +194,32 @@ jobs:
           use_rsync: true
           commit_message: 'Commit from GWT-M3O-TEST/GWT-m3o action'
 
-      - name: Push Dart files
+      - name: Push Dart clients
         uses: dmnemec/copy_file_to_another_repo_action@main
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source_file: 'm3o-dart/'
+          source_file: 'm3o-dart/lib/'
           destination_repo: 'GWT-M3O-TEST/GWT-m3o-dart'
           destination_branch: ${{ steps.extract_branch.outputs.branch }}
+          destination_folder: 'lib/'
+          git_server: 'github.com'
+          user_email:  'danieljoudat@gmail.com'
+          user_name: 'lambdaR'
+          use_rsync: true
+          commit_message: 'Commit from GWT-M3O-TEST/GWT-m3o action'
+
+      - name: Push Dart examples
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_file: 'm3o-dart/example/'
+          destination_repo: 'GWT-M3O-TEST/GWT-m3o-dart'
+          destination_branch: ${{ steps.extract_branch.outputs.branch }}
+          destination_folder: 'example/'
           git_server: 'github.com'
           user_email:  'danieljoudat@gmail.com'
           user_name: 'lambdaR'

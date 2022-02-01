@@ -36,13 +36,13 @@ func (d *dartG) ServiceClient(serviceName, dartPath string, service service) {
 		fmt.Println("Failed to unmarshal", err)
 		os.Exit(1)
 	}
-	err = os.MkdirAll(filepath.Join(dartPath, serviceName), FOLDER_EXECUTE_PERMISSION)
+	err = os.MkdirAll(filepath.Join(dartPath, "lib", "src", serviceName), FOLDER_EXECUTE_PERMISSION)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	clientFile := filepath.Join(dartPath, serviceName, fmt.Sprint(serviceName, ".dart"))
+	clientFile := filepath.Join(dartPath, "lib", "src", serviceName, fmt.Sprint(serviceName, ".dart"))
 	f, err := os.OpenFile(clientFile, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
 	if err != nil {
 		fmt.Println("Failed to open schema file", err)
@@ -108,6 +108,8 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 
 	for p, meta := range protoMessage.Value.Properties {
 		comments := ""
+		o := ""
+
 		if meta.Value.Description != "" {
 			for _, commentLine := range strings.Split(meta.Value.Description, "\n") {
 				comments += "/// " + strings.TrimSpace(commentLine) + "\n"
@@ -119,15 +121,13 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 				"type":      stringType,
 				"parameter": p,
 			}
-			o := runTemplate("normal", normalType, payload)
-			output = append(output, comments+o)
+			o = runTemplate("normal", normalType, payload)
 		case "boolean":
 			payload := map[string]interface{}{
 				"type":      boolType,
 				"parameter": p,
 			}
-			o := runTemplate("normal", normalType, payload)
-			output = append(output, comments+o)
+			o = runTemplate("normal", normalType, payload)
 		case "number":
 			switch meta.Value.Format {
 			case "int32", "int64":
@@ -135,15 +135,13 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 					"type":      int64Type,
 					"parameter": p,
 				}
-				o := runTemplate("normal", normalType, payload)
-				output = append(output, comments+o)
+				o = runTemplate("normal", normalType, payload)
 			case "float", "double":
 				payload := map[string]interface{}{
 					"type":      doubleType,
 					"parameter": p,
 				}
-				o := runTemplate("normal", normalType, payload)
-				output = append(output, comments+o)
+				o = runTemplate("normal", normalType, payload)
 			}
 		case "array":
 			types := detectType2(serviceName, typeName, p)
@@ -151,8 +149,7 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 				"type":      typesMapper(types[0]),
 				"parameter": p,
 			}
-			o := runTemplate("array", arrayType, payload)
-			output = append(output, comments+o)
+			o = runTemplate("array", arrayType, payload)
 		case "object":
 			types := detectType2(serviceName, typeName, p)
 			if len(types) == 1 {
@@ -161,8 +158,7 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 					"type":      types[0],
 					"parameter": p,
 				}
-				o := runTemplate("normal", normalType, payload)
-				output = append(output, comments+o)
+				o = runTemplate("normal", normalType, payload)
 			} else {
 				// a Map object
 				payload := map[string]interface{}{
@@ -170,17 +166,16 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 					"type2":     typesMapper(types[1]),
 					"parameter": p,
 				}
-				o := runTemplate("map", mapType, payload)
-				output = append(output, comments+o)
+				o = runTemplate("map", mapType, payload)
 			}
 		default:
 			payload := map[string]interface{}{
 				"parameter": p,
 			}
-			o := runTemplate("any", anyType, payload)
-			output = append(output, comments+o)
+			o = runTemplate("any", anyType, payload)
 		}
 
+		output = append(output, comments+o)
 	}
 
 	res := "{" + strings.Join(output, ", ") + ",}"
@@ -202,7 +197,7 @@ func (d *dartG) IndexFile(dartPath string, services []service) {
 		fmt.Println("Failed to unmarshal", err)
 		os.Exit(1)
 	}
-	f, err := os.OpenFile(filepath.Join(dartPath, "m3o.dart"), os.O_TRUNC|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
+	f, err := os.OpenFile(filepath.Join(dartPath, "lib", "m3o.dart"), os.O_TRUNC|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
 	if err != nil {
 		fmt.Println("Failed to open collector file", err)
 		os.Exit(1)
