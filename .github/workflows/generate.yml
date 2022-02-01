@@ -204,7 +204,6 @@ jobs:
           use_rsync: true
           commit_message: 'Commit from GWT-M3O-TEST/GWT-m3o action'
 
-          
       # - name: Push shell files
       #   uses: dmnemec/copy_file_to_another_repo_action@main
       #   if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
