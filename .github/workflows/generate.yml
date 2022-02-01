@@ -27,16 +27,17 @@ jobs:
       - name: Install Protoc
         uses: arduino/setup-protoc@master
 
-      - name: Check m3o repo
+      - name: Check GWT-m3o repo
         uses: actions/checkout@v2
         with:
+          repository: 'GWT-M3O-TEST/GWT-m3o'
           path: m3o
           ref: ${{ github.ref }}
 
-      - name: Check services repo
+      - name: Check GWT-services repo
         uses: actions/checkout@v2
         with:
-          repository: 'lambdaR/GWT-services'
+          repository: 'GWT-M3O-TEST/GWT-services'
           path: services
 
       - name: Check micro repo
@@ -46,16 +47,16 @@ jobs:
           path: 'micro'
           ref: 'master'
 
-      - name: Check m3o-go repo
+      - name: Check GWT-m3o-go repo
         uses: actions/checkout@v2
         with:
-          repository: 'lambdaR/GWT-m3o-go'
+          repository: 'GWT-M3O-TEST/GWT-m3o-go'
           path: m3o-go
 
-      - name: Check m3o-dart repo
+      - name: Check GWT-m3o-dart repo
         uses: actions/checkout@v2
         with:
-          repository: 'lambdaR/GWT-m3o-dart'
+          repository: 'GWT-M3O-TEST/GWT-m3o-dart'
           path: m3o-dart
 
       - name: Enable caching
@@ -165,7 +166,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source_file: 'm3o-dart/'
-          destination_repo: 'lambdaR/GWT-m3o-dart'
+          destination_repo: 'GWT-M3O-TEST/GWT-m3o-dart'
           destination_branch: ${{ steps.extract_branch.outputs.branch }}
           git_server: 'github.com'
           user_email:  'danieljoudat@gmail.com'
@@ -180,7 +181,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source_file: 'm3o-go/'
-          destination_repo: 'lambdaR/GWT-m3o-go'
+          destination_repo: 'GWT-M3O-TEST/GWT-m3o-go'
           destination_branch: ${{ steps.extract_branch.outputs.branch }}
           git_server: 'github.com'
           user_email:  'danieljoudat@gmail.com'
@@ -195,7 +196,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source_file: 'services/clients/ts/'
-          destination_repo: 'lambdaR/GWT-m3o-js'
+          destination_repo: 'GWT-M3O-TEST/GWT-m3o-js'
           destination_branch: ${{ steps.extract_branch.outputs.branch }}
           git_server: 'github.com'
           user_email:  'danieljoudat@gmail.com'
