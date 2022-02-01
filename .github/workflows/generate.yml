@@ -172,7 +172,7 @@ jobs:
           user_email:  'danieljoudat@gmail.com'
           user_name: 'lambdaR'
           use_rsync: true
-          commit_message: 'Commit from lambdaR/GWT-m3o action'
+          commit_message: 'Commit from GWT-M3O-TEST/GWT-m3o action'
           
       - name: Push Go files
         uses: dmnemec/copy_file_to_another_repo_action@main
@@ -187,7 +187,7 @@ jobs:
           user_email:  'danieljoudat@gmail.com'
           user_name: 'lambdaR'
           use_rsync: true
-          commit_message: 'Commit from lambdaR/GWT-m3o action'
+          commit_message: 'Commit from GWT-M3O-TEST/GWT-m3o action'
           
       - name: Push JS files
         uses: dmnemec/copy_file_to_another_repo_action@main
@@ -202,7 +202,7 @@ jobs:
           user_email:  'danieljoudat@gmail.com'
           user_name: 'lambdaR'
           use_rsync: true
-          commit_message: 'Commit from lambdaR/GWT-m3o action'
+          commit_message: 'Commit from GWT-M3O-TEST/GWT-m3o action'
 
       # - name: Push shell files
       #   uses: dmnemec/copy_file_to_another_repo_action@main
