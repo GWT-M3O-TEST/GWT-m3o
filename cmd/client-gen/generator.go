@@ -307,7 +307,9 @@ func detectType(currentType string, properties, schemas map[string]*openapi3.Sch
 // also the type of enum directly from proto file for the specified
 // service, message and field name
 func detectType2(service, message, field string) []string {
-	// fmt.Printf("service: %v | message: %v | field: %v\n", service, message, field)
+	protoExternalTypes := map[string]string{
+		".google.protobuf.Struct": "JSON",
+	}
 
 	res := []string{}
 
@@ -351,6 +353,14 @@ func detectType2(service, message, field string) []string {
 		return []string{key, value}
 	}
 
+	// An external type
+	protoDesc := fieldDesc.AsFieldDescriptorProto()
+	s, ok := protoExternalTypes[*protoDesc.TypeName]
+	if ok {
+		return []string{s}
+	}
+
+	// Enum, Message and primitive types
 	switch t := fieldDesc.GetType(); t.String() {
 	case "TYPE_ENUM":
 		eDesc := fieldDesc.GetEnumType()

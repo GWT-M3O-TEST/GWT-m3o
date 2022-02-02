@@ -243,6 +243,7 @@ func (n *tsG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 	var arrayType = `{{ .parameter }}?: {{ .type }}[];`
 	var mapType = ` {{ .parameter }}?: { [key:{{ .type1 }}]: {{ .type2 }} };`
 	var anyType = `{{ .parameter }}?: any;`
+	var jsonType = "{ [key: string]: any }"
 	var stringType = "string"
 	var number = "number"
 	var boolType = "boolean"
@@ -314,9 +315,12 @@ func (n *tsG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 			}
 			o = runTemplate("normal", normalType, payload)
 		case "array":
-			types := detectType2(serviceName, typeName, p)
+			types := detectType2(serviceName, typeName, p)[0]
+			if types == "JSON" {
+				types = jsonType
+			}
 			payload := map[string]interface{}{
-				"type":      typesMapper(types[0]),
+				"type":      typesMapper(types),
 				"parameter": p,
 			}
 			o = runTemplate("array", arrayType, payload)

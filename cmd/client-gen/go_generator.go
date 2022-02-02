@@ -204,6 +204,7 @@ func (g *goG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 	var arrayType = `{{ .parameter }} []{{ .type }}`
 	var mapType = ` {{ .parameter }} map[{{ .type1 }}]{{ .type2 }}`
 	var anyType = `{{ .parameter }} interface{}`
+	var jsonType = "map[string]interface{}"
 	var stringType = "string"
 	var int32Type = "int32"
 	var int64Type = "int64"
@@ -305,10 +306,13 @@ func (g *goG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 				o = runTemplate("normal", normalType, payload)
 			}
 		case "array":
-			types := detectType2(serviceName, typeName, p)
+			types := detectType2(serviceName, typeName, p)[0]
+			if types == "JSON" {
+				types = jsonType
+			}
 			payload := map[string]interface{}{
-				"type":      typesMapper(types[0]),
-				"parameter": strcase.UpperCamelCase(p),
+				"type":      typesMapper(types),
+				"parameter": p,
 			}
 			o = runTemplate("array", arrayType, payload)
 		case "object":

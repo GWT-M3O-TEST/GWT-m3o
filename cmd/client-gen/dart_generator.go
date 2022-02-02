@@ -62,6 +62,7 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 	var arrayType = `List<{{ .type }}>? {{ .parameter }}`
 	var mapType = `Map<{{ .type1 }}, {{ .type2 }}>? {{ .parameter }}`
 	var anyType = `dynamic {{ .parameter }}`
+	var jsonType = "Map<String, dynamic>"
 	var stringType = "String"
 	var int64Type = "int"
 	var doubleType = "double"
@@ -144,9 +145,12 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 				o = runTemplate("normal", normalType, payload)
 			}
 		case "array":
-			types := detectType2(serviceName, typeName, p)
+			types := detectType2(serviceName, typeName, p)[0]
+			if types == "JSON" {
+				types = jsonType
+			}
 			payload := map[string]interface{}{
-				"type":      typesMapper(types[0]),
+				"type":      typesMapper(types),
 				"parameter": p,
 			}
 			o = runTemplate("array", arrayType, payload)
