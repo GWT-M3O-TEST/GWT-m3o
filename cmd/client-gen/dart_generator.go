@@ -94,6 +94,8 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 			return doubleType
 		case "BOOL":
 			return boolType
+		case "JSON":
+			return jsonType
 		default:
 			return t
 		}
@@ -145,12 +147,9 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 				o = runTemplate("normal", normalType, payload)
 			}
 		case "array":
-			types := detectType2(serviceName, typeName, p)[0]
-			if types == "JSON" {
-				types = jsonType
-			}
+			types := detectType2(serviceName, typeName, p)
 			payload := map[string]interface{}{
-				"type":      typesMapper(types),
+				"type":      typesMapper(types[0]),
 				"parameter": p,
 			}
 			o = runTemplate("array", arrayType, payload)
