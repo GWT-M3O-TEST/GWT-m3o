@@ -328,7 +328,7 @@ func (n *tsG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 			if len(types) == 1 {
 				// a Message Type
 				payload := map[string]interface{}{
-					"type":      types[0],
+					"type":      typesMapper(types[0]),
 					"parameter": p,
 				}
 				o = runTemplate("normal", normalType, payload)

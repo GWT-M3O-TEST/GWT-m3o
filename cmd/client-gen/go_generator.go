@@ -311,7 +311,7 @@ func (g *goG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 			types := detectType2(serviceName, typeName, p)
 			payload := map[string]interface{}{
 				"type":      typesMapper(types[0]),
-				"parameter": p,
+				"parameter": strcase.UpperCamelCase(p),
 			}
 			o = runTemplate("array", arrayType, payload)
 		case "object":
@@ -319,7 +319,7 @@ func (g *goG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 			if len(types) == 1 {
 				// a Message Type
 				payload := map[string]interface{}{
-					"type":      types[0],
+					"type":      typesMapper(types[0]),
 					"parameter": strcase.UpperCamelCase(p),
 				}
 				o = runTemplate("normal", normalType, payload)
