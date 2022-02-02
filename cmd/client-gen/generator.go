@@ -354,10 +354,11 @@ func detectType2(service, message, field string) []string {
 	}
 
 	// An external type
-	protoDesc := fieldDesc.AsFieldDescriptorProto()
-	s, ok := protoExternalTypes[*protoDesc.TypeName]
-	if ok {
-		return []string{s}
+	if protoDesc := fieldDesc.AsFieldDescriptorProto(); protoDesc != nil {
+		s, ok := protoExternalTypes[*protoDesc.TypeName]
+		if ok {
+			return []string{s}
+		}
 	}
 
 	// Enum, Message and primitive types
