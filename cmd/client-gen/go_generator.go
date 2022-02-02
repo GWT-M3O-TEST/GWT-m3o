@@ -211,7 +211,7 @@ func (g *goG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 	var floatType = "float32"
 	var doubleType = "float64"
 	var boolType = "bool"
-	// var typePrefix = "*"
+	var pointerType = "*"
 
 	runTemplate := func(tmpName, temp string, payload map[string]interface{}) string {
 		t, err := template.New(tmpName).Parse(temp)
@@ -319,7 +319,7 @@ func (g *goG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 			if len(types) == 1 {
 				// a Message Type
 				payload := map[string]interface{}{
-					"type":      typesMapper(types[0]),
+					"type":      pointerType + typesMapper(types[0]),
 					"parameter": strcase.UpperCamelCase(p),
 				}
 				o = runTemplate("normal", normalType, payload)
