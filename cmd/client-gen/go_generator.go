@@ -200,10 +200,10 @@ func (g *goG) IndexFile(goPath string, services []service) {
 }
 
 func (g *goG) schemaToType(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
-	var normalType = `{{ .parameter }} {{ .type }}`
-	var arrayType = `{{ .parameter }} []{{ .type }}`
-	var mapType = ` {{ .parameter }} map[{{ .type1 }}]{{ .type2 }}`
-	var anyType = `{{ .parameter }} interface{}`
+	var normalType = `{{ .parameter }} {{ .type }} ` + "`json:\"" + `{{ .parameter }}{{ .tag }}` + "\"`"
+	var arrayType = `{{ .parameter }} []{{ .type }} ` + "`json:\"" + `{{ .parameter }}{{ .tag }}` + "\"`"
+	var mapType = ` {{ .parameter }} map[{{ .type1 }}]{{ .type2 }} ` + "`json:\"" + `{{ .parameter }}{{ .tag }}` + "\"`"
+	var anyType = `{{ .parameter }} interface{} ` + "`json:\"" + `{{ .parameter }}{{ .tag }}` + "\"`"
 	var jsonType = "map[string]interface{}"
 	var stringType = "string"
 	var int32Type = "int32"
@@ -292,6 +292,7 @@ func (g *goG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 				payload := map[string]interface{}{
 					"type":      int64Type,
 					"parameter": strcase.UpperCamelCase(p),
+					"tag":       ",string",
 				}
 				o = runTemplate("normal", normalType, payload)
 			case "float":
@@ -344,7 +345,6 @@ func (g *goG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 			o = runTemplate("any", anyType, payload)
 		}
 
-		o += fmt.Sprintf(" `json:\"%v\"`", p)
 		output = append(output, comments+o)
 	}
 
