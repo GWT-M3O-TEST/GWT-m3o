@@ -200,12 +200,10 @@ func (g *goG) IndexFile(goPath string, services []service) {
 }
 
 func (g *goG) schemaToType(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
-	var normalType = `{{ .parameter }} {{ .type }} ` + "`json:\"" + `{{ .parameter }}` + "\"`"
-	// int64 represented as string
-	var specialType = `{{ .parameter }} {{ .type }} ` + "`json:\"" + `{{ .parameter }},string` + "\"`"
-	var arrayType = `{{ .parameter }} []{{ .type }} ` + "`json:\"" + `{{ .parameter }}` + "\"`"
-	var mapType = ` {{ .parameter }} map[{{ .type1 }}]{{ .type2 }} ` + "`json:\"" + `{{ .parameter }}` + "\"`"
-	var anyType = `{{ .parameter }} interface{} ` + "`json:\"" + `{{ .parameter }}` + "\"`"
+	var normalType = `{{ .parameter }} {{ .type }}`
+	var arrayType = `{{ .parameter }} []{{ .type }}`
+	var mapType = ` {{ .parameter }} map[{{ .type1 }}]{{ .type2 }}`
+	var anyType = `{{ .parameter }} interface{}`
 	var jsonType = "map[string]interface{}"
 	var stringType = "string"
 	var int32Type = "int32"
@@ -295,7 +293,7 @@ func (g *goG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 					"type":      int64Type,
 					"parameter": strcase.UpperCamelCase(p),
 				}
-				o = runTemplate("special", specialType, payload)
+				o = runTemplate("normal", normalType, payload)
 			case "float":
 				payload := map[string]interface{}{
 					"type":      floatType,
@@ -344,6 +342,13 @@ func (g *goG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 				"parameter": strcase.UpperCamelCase(p),
 			}
 			o = runTemplate("any", anyType, payload)
+		}
+
+		// int64 represented as string
+		if meta.Value.Format == "int64" {
+			o += fmt.Sprintf(" `json:\"%v,string\"`", p)
+		} else {
+			o += fmt.Sprintf(" `json:\"%v\"`", p)
 		}
 
 		output = append(output, comments+o)
