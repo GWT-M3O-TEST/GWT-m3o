@@ -316,10 +316,15 @@ func (g *goG) schemaToType(serviceName, typeName string, schemas map[string]*ope
 			o = runTemplate("array", arrayType, payload)
 		case "object":
 			types := detectType2(serviceName, typeName, p)
+			// a Message Type
 			if len(types) == 1 {
-				// a Message Type
+				t := pointerType + typesMapper(types[0])
+				// protobuf external type
+				if types[0] == "JSON" {
+					t = typesMapper(types[0])
+				}
 				payload := map[string]interface{}{
-					"type":      pointerType + typesMapper(types[0]),
+					"type":      t,
 					"parameter": strcase.UpperCamelCase(p),
 				}
 				o = runTemplate("normal", normalType, payload)
