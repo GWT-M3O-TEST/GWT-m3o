@@ -271,38 +271,6 @@ func copyFileContents(src, dst string) (err error) {
 	return
 }
 
-func detectType(currentType string, properties, schemas map[string]*openapi3.SchemaRef) (string, bool) {
-	index := map[string]bool{}
-	for key, prop := range properties {
-		index[key+prop.Value.Title+prop.Value.Description] = true
-	}
-
-	for k, schema := range schemas {
-		// we don't want to return the type matching itself
-		if strings.ToLower(k) == currentType {
-			continue
-		}
-		if strings.HasSuffix(k, "Request") || strings.HasSuffix(k, "Response") {
-			continue
-		}
-		if len(schema.Value.Properties) != len(properties) {
-			continue
-		}
-		found := false
-		for key, prop := range schema.Value.Properties {
-			_, ok := index[key+prop.Value.Title+prop.Value.Description]
-			found = ok
-			if !ok {
-				break
-			}
-		}
-		if found {
-			return schema.Value.Title, true
-		}
-	}
-	return "", false
-}
-
 // detectType detects the type of elements in an array, types of key/value elements in a map
 // also the type of enum directly from proto file for the specified
 // service, message and field name
@@ -374,6 +342,38 @@ func detectType2(service, message, field string) []string {
 		return []string{strings.Split(t, "_")[1]}
 	}
 }
+
+// func detectType(currentType string, properties, schemas map[string]*openapi3.SchemaRef) (string, bool) {
+// 	index := map[string]bool{}
+// 	for key, prop := range properties {
+// 		index[key+prop.Value.Title+prop.Value.Description] = true
+// 	}
+
+// 	for k, schema := range schemas {
+// 		// we don't want to return the type matching itself
+// 		if strings.ToLower(k) == currentType {
+// 			continue
+// 		}
+// 		if strings.HasSuffix(k, "Request") || strings.HasSuffix(k, "Response") {
+// 			continue
+// 		}
+// 		if len(schema.Value.Properties) != len(properties) {
+// 			continue
+// 		}
+// 		found := false
+// 		for key, prop := range schema.Value.Properties {
+// 			_, ok := index[key+prop.Value.Title+prop.Value.Description]
+// 			found = ok
+// 			if !ok {
+// 				break
+// 			}
+// 		}
+// 		if found {
+// 			return schema.Value.Title, true
+// 		}
+// 	}
+// 	return "", false
+// }
 
 // func schemaToMethods(title string, spec *openapi3.RequestBodyRef) string {
 // 	return ""
