@@ -185,33 +185,33 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 	return res
 }
 
-func (d *dartG) IndexFile(dartPath string, services []service) {
-	templ, err := template.New("dartCollector").Funcs(funcMap()).Parse(dartIndexTemplate)
-	if err != nil {
-		fmt.Println("Failed to unmarshal", err)
-		os.Exit(1)
-	}
-	b := bytes.Buffer{}
-	buf := bufio.NewWriter(&b)
-	err = templ.Execute(buf, map[string]interface{}{
-		"services": services,
-	})
-	if err != nil {
-		fmt.Println("Failed to unmarshal", err)
-		os.Exit(1)
-	}
-	f, err := os.OpenFile(filepath.Join(dartPath, "lib", "m3o.dart"), os.O_TRUNC|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
-	if err != nil {
-		fmt.Println("Failed to open collector file", err)
-		os.Exit(1)
-	}
-	buf.Flush()
-	_, err = f.Write(b.Bytes())
-	if err != nil {
-		fmt.Println("Failed to append to collector file", err)
-		os.Exit(1)
-	}
-}
+// func (d *dartG) IndexFile(dartPath string, services []service) {
+// 	templ, err := template.New("dartCollector").Funcs(funcMap()).Parse(dartIndexTemplate)
+// 	if err != nil {
+// 		fmt.Println("Failed to unmarshal", err)
+// 		os.Exit(1)
+// 	}
+// 	b := bytes.Buffer{}
+// 	buf := bufio.NewWriter(&b)
+// 	err = templ.Execute(buf, map[string]interface{}{
+// 		"services": services,
+// 	})
+// 	if err != nil {
+// 		fmt.Println("Failed to unmarshal", err)
+// 		os.Exit(1)
+// 	}
+// 	f, err := os.OpenFile(filepath.Join(dartPath, "lib", "m3o.dart"), os.O_TRUNC|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
+// 	if err != nil {
+// 		fmt.Println("Failed to open collector file", err)
+// 		os.Exit(1)
+// 	}
+// 	buf.Flush()
+// 	_, err = f.Write(b.Bytes())
+// 	if err != nil {
+// 		fmt.Println("Failed to append to collector file", err)
+// 		os.Exit(1)
+// 	}
+// }
 
 func (d *dartG) TopReadme(serviceName, examplesPath string, service service) {
 	templ, err := template.New("dartTopReadme" + serviceName).Funcs(funcMap()).Parse(dartReadmeTopTemplate)

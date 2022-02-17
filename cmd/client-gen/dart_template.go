@@ -1,15 +1,15 @@
 package main
 
-const dartIndexTemplate = `library m3o;
-  
-export 'src/client.dart';
-{{ range $service := .services }}export 'src/{{ $service.Name }}/{{ $service.Name}}.dart';
-{{ end }}
-`
+// const dartIndexTemplate = `library m3o;
+
+// export 'src/client.dart';
+// {{ range $service := .services }}export 'src/{{ $service.Name }}/{{ $service.Name}}.dart';
+// {{ end }}
+// `
 
 const dartServiceTemplate = `{{ $service := .service }}
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:m3o/m3o.dart';
+import '../client/client.dart';
 
 part '{{ $service.Name }}.freezed.dart';
 part '{{ $service.Name }}.g.dart';
@@ -23,7 +23,7 @@ class {{title $service.Name}}Service {
 	}
 {{ range $key, $req := $service.Spec.Components.RequestBodies }}{{ $reqType := requestType $key }}{{ $endpointName := requestTypeToEndpointName $key}}
 	/{{ if endpointComment $endpointName $service.Spec.Components.Schemas }}{{ endpointComment $endpointName $service.Spec.Components.Schemas }}{{ end -}}
-	{{ if isNotStream $service.Spec $service.Name $reqType }}Future<{{ title $service.Name }}{{ $endpointName }}Response> {{untitle $endpointName}}({{ title $service.Name }}{{ $endpointName }}Request req) async {
+	{{ if isNotStream $service.Spec $service.Name $reqType }}Future<{{ $endpointName }}Response> {{untitle $endpointName}}({{ $endpointName }}Request req) async {
 		Request request = Request(
 			service: '{{$service.Name}}',
 			endpoint: '{{$endpointName}}',
@@ -34,14 +34,14 @@ class {{title $service.Name}}Service {
 			Response res = await _client.call(request);
 			if (isError(res.body)) {
 			  final err = Merr(res.toJson());
-			  return {{ title $service.Name }}{{ $endpointName }}Response.Merr(body: err.b);
+			  return {{ $endpointName }}Response.Merr(body: err.b);
 			}
-			return {{ title $service.Name }}{{ $endpointName }}ResponseData.fromJson(res.body);
+			return {{ $endpointName }}ResponseData.fromJson(res.body);
 		  } catch (e) {
 			throw Exception(e);
 		  }
 	}{{end}}
-	{{ if isStream $service.Spec $service.Name $reqType }}Stream<{{ title $service.Name }}{{ $endpointName }}Response> {{untitle $endpointName}}({{ title $service.Name }}{{ $endpointName }}Request req) async* {
+	{{ if isStream $service.Spec $service.Name $reqType }}Stream<{{ $endpointName }}Response> {{untitle $endpointName}}({{ $endpointName }}Request req) async* {
 		Request request = Request(
 			service: '{{$service.Name}}',
 			endpoint: '{{$endpointName}}',
@@ -53,9 +53,9 @@ class {{title $service.Name}}Service {
 			await for (var value in webS!) {
 				final vo = jsonDecode(value);
 				if (isError(vo)) {
-					yield {{ title $service.Name }}{{ $endpointName }}Response.Merr(body: vo);
+					yield {{ $endpointName }}Response.Merr(body: vo);
 				} else {
-					yield {{ title $service.Name }}{{ $endpointName }}ResponseData.fromJson(vo);
+					yield {{ $endpointName }}ResponseData.fromJson(vo);
 				}
 			}
 		} catch (e) {
@@ -68,20 +68,20 @@ class {{title $service.Name}}Service {
 {{ $isResponse := isResponse $typeName }}
 {{ if not $isResponse }}
 @Freezed()
-class {{ title $service.Name }}{{ title $typeName }} with _${{ title $service.Name }}{{ title $typeName }} {
-	const factory {{ title $service.Name }}{{ title $typeName }}({{ recursiveTypeDefinitionDart $service.Name $typeName $service.Spec.Components.Schemas }}) = _{{ title $service.Name }}{{ title $typeName }};
-	factory {{ title $service.Name }}{{ title $typeName }}.fromJson(Map<String, dynamic> json) =>
-      _${{ title $service.Name }}{{ title $typeName }}FromJson(json);
+class {{ title $typeName }} with _${{ title $typeName }} {
+	const factory {{ title $typeName }}({{ recursiveTypeDefinitionDart $service.Name $typeName $service.Spec.Components.Schemas }}) = _{{ title $typeName }};
+	factory {{ title $typeName }}.fromJson(Map<String, dynamic> json) =>
+      _${{ title $typeName }}FromJson(json);
 }
 {{ end }}
 {{ if $isResponse }}
 @Freezed()
-class {{ title $service.Name }}{{ title $typeName }} with _${{ title $service.Name }}{{ title $typeName }} {
-	const factory {{ title $service.Name }}{{ title $typeName }}({{ recursiveTypeDefinitionDart $service.Name $typeName $service.Spec.Components.Schemas }}) = {{ title $service.Name }}{{ title $typeName }}Data;
-	const factory {{ title $service.Name }}{{ title $typeName }}.Merr({Map<String, dynamic>? body}) =
-	{{ title $service.Name }}{{ title $typeName }}Merr;
-	factory {{ title $service.Name }}{{ title $typeName }}.fromJson(Map<String, dynamic> json) =>
-      _${{ title $service.Name }}{{ title $typeName }}FromJson(json);
+class {{ title $typeName }} with _${{ title $typeName }} {
+	const factory {{ title $typeName }}({{ recursiveTypeDefinitionDart $service.Name $typeName $service.Spec.Components.Schemas }}) = {{ title $typeName }}Data;
+	const factory {{ title $typeName }}.Merr({Map<String, dynamic>? body}) =
+	{{ title $typeName }}Merr;
+	factory {{ title $typeName }}.fromJson(Map<String, dynamic> json) =>
+      _${{ title $typeName }}FromJson(json);
 }
 {{ end }}
 {{ end }}
@@ -89,7 +89,8 @@ class {{ title $service.Name }}{{ title $typeName }} with _${{ title $service.Na
 
 const dartExampleTemplate = `{{ $service := .service }}import 'dart:io';
 
-import 'package:m3o/m3o.dart';
+import 'package:m3o/src/client/client.dart';
+import 'package:m3o/src/{{ $service.Name }}/{{ $service.Name }}.dart';
 
 void main() async {
   final token = Platform.environment['M3O_API_TOKEN']!;
@@ -102,23 +103,23 @@ void main() async {
  
   final payload = <String, dynamic>{{ dartExampleRequest .example.Request }};
 
-  {{ title $service.Name }}{{ title .endpoint }}Request req = {{ title $service.Name }}{{ title .endpoint }}Request.fromJson(payload);
+  {{ title .endpoint }}Request req = {{ title .endpoint }}Request.fromJson(payload);
 
   
   try {
 	  {{ $reqType := requestType .endpoint }}
 	  {{ if isNotStream $service.Spec $service.Name $reqType }}
-	  {{ title $service.Name }}{{ title .endpoint }}Response res = await ser.{{ .endpoint }}(req);
+	  {{ title .endpoint }}Response res = await ser.{{ .endpoint }}(req);
 
     res.map((value) => print(value),
-        Merr: ({{ title $service.Name }}{{ title .endpoint }}ResponseMerr err) => print(err.body!['body']));
+        Merr: ({{ title .endpoint }}ResponseMerr err) => print(err.body!['body']));
 
 	  {{ end }}	
 	  {{ if isStream $service.Spec $service.Name $reqType }}
 	  final res = await ser.{{ .endpoint }}(req);
 		await for (var sr in res) {
 		sr.map((value) => print(value),
-			Merr: ({{ title $service.Name }}{{ title .endpoint }}ResponseMerr err) => print(err.body));
+			Merr: ({{ title .endpoint }}ResponseMerr err) => print(err.body));
 		}	
 	  {{ end }}
   } catch (e) {
@@ -145,7 +146,8 @@ const dartReadmeBottomTemplate = `{{ $service := .service }}## {{ title .endpoin
 ` + "```" + `dart
 {{ $service := .service -}}import 'dart:io';
 
-import 'package:m3o/m3o.dart';
+import 'package:m3o/src/client/client.dart';
+import 'package:m3o/src/{{ $service.Name }}/{{ $service.Name }}.dart';
 
 void main() async {
   final token = Platform.environment['M3O_API_TOKEN']!;
@@ -158,16 +160,16 @@ void main() async {
  
   final payload = <String, dynamic>{{ dartExampleRequest .example.Request }};
 
-  {{ title $service.Name }}{{ title .endpoint }}Request req = {{ title $service.Name }}{{ title .endpoint }}Request.fromJson(payload);
+  {{ title .endpoint }}Request req = {{ title .endpoint }}Request.fromJson(payload);
 
   {{ $reqType := requestType .endpoint }}
   {{ if isNotStream $service.Spec $service.Name $reqType -}}
   try {
 
-	{{ title $service.Name }}{{ title .endpoint }}Response res = await ser.{{ .endpoint }}(req);
+	{{ title .endpoint }}Response res = await ser.{{ .endpoint }}(req);
 
     res.map((value) => print(value),
-	  Merr: ({{ title $service.Name }}{{ title .endpoint }}ResponseMerr err) => print(err.body!['body']));
+	  Merr: ({{ title .endpoint }}ResponseMerr err) => print(err.body!['body']));
   {{- end }}	
   {{ if isStream $service.Spec $service.Name $reqType -}}
   try {
@@ -176,7 +178,7 @@ void main() async {
 
 	  await for (var sr in res) {
 	  sr.map((value) => print(value),
-		Merr: ({{ title $service.Name }}{{ title .endpoint }}ResponseMerr err) => print(err.body));
+		Merr: ({{ title .endpoint }}ResponseMerr err) => print(err.body));
 	  }	
 	{{- end }}
   } catch (e) {

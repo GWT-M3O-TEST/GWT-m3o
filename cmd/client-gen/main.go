@@ -132,7 +132,7 @@ func main() {
 	}
 
 	goG.IndexFile(goPath, services)
-	dartG.IndexFile(dartPath, services)
+	// dartG.IndexFile(dartPath, services)
 	tsG.IndexFile(workDir, tsPath, services)
 
 	// publishToNpm(tsPath, tsFileList)
