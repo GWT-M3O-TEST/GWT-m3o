@@ -7,7 +7,7 @@ package main
 // {{ end }}
 // `
 
-const dartServiceTemplate = `{{ $service := .service }}
+const dartServiceTemplate = `{{ $service := .service }}import 'dart:convert';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../client/client.dart';
 
