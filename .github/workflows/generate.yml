@@ -226,20 +226,21 @@ jobs:
           use_rsync: true
           commit_message: 'Commit from GWT-M3O-TEST/GWT-m3o action'
       
-      # - name: Push shell files
-      #   uses: dmnemec/copy_file_to_another_repo_action@main
-      #   if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
-      #   env:
-      #     API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-      #   with:
-      #     source_file: 'services/examples/curl/'
-      #     destination_repo: 'm3o/m3o-sh'
-      #     destination_folder: 'examples'
-      #     destination_branch: '${{ steps.extract_branch.outputs.branch }}'
-      #     github_server: 'github.com'
-      #     user_name: 'm3o-actions'
-      #     use_rsync: true
-      #     commit_message: 'Commit from m3o/m3o action'
+      - name: Push shell files
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_file: 'services/examples/curl/'
+          destination_repo: 'GWT-M3O-TEST/GWT-m3o-sh'
+          destination_folder: 'examples'
+          destination_branch: '${{ steps.extract_branch.outputs.branch }}'
+          git_server: 'github.com'
+          user_email:  'danieljoudat@gmail.com'
+          user_name: 'lambdaR'
+          use_rsync: true
+          commit_message: 'Commit from GWT-M3O_TEST/GWT-m3o action'
 
       # - name: install postman converter
       #   working-directory: services
