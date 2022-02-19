@@ -135,6 +135,5 @@ func main() {
 	// dartG.IndexFile(dartPath, services)
 	tsG.IndexFile(workDir, tsPath, services)
 
-	dartG.UpdateVersionChangelog(dartPath)
 	// publishToNpm(tsPath, tsFileList)
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -332,4 +333,14 @@ func (d *dartG) ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title 
 		fmt.Printf("Problem with '%v' example '%v': %v\n", serviceName, endpoint, string(outp))
 		os.Exit(1)
 	}
+}
+
+func schemaToDartExample(exampleJSON map[string]interface{}) string {
+	isEmpty := len(exampleJSON) == 0
+	if !isEmpty {
+		bs, _ := json.MarshalIndent(exampleJSON, "", "  ")
+		return strings.Replace(string(bs), "}", ",}", 1)
+	}
+
+	return "{}"
 }
