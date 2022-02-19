@@ -14,6 +14,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/stoewer/go-strcase"
+	"gopkg.in/yaml.v2"
 )
 
 type dartG struct {
@@ -343,4 +344,33 @@ func schemaToDartExample(exampleJSON map[string]interface{}) string {
 	}
 
 	return "{}"
+}
+
+func (d *dartG) UpdateVersionChangelog(dartPath string) {
+	// read latest version build from pubspec.yml
+	type t struct {
+		name        string
+		version     string
+		homepage    string
+		description string
+	}
+
+	y := t{}
+
+	data, err := ioutil.ReadFile(filepath.Join(dartPath, "pubspec.yaml"))
+	if err != nil {
+		// TODO: handle err
+		fmt.Println(err)
+	}
+
+	err = yaml.Unmarshal(data, &y)
+	if err != nil {
+		// TODO handle error
+		fmt.Println(err)
+	}
+
+	fmt.Println(y.name)
+	fmt.Println(y.version)
+	fmt.Println(y.homepage)
+	fmt.Println(y.description)
 }
