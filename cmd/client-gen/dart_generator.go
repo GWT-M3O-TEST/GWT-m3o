@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -14,7 +13,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/stoewer/go-strcase"
-	"gopkg.in/yaml.v2"
 )
 
 type dartG struct {
@@ -334,43 +332,4 @@ func (d *dartG) ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title 
 		fmt.Printf("Problem with '%v' example '%v': %v\n", serviceName, endpoint, string(outp))
 		os.Exit(1)
 	}
-}
-
-func schemaToDartExample(exampleJSON map[string]interface{}) string {
-	isEmpty := len(exampleJSON) == 0
-	if !isEmpty {
-		bs, _ := json.MarshalIndent(exampleJSON, "", "  ")
-		return strings.Replace(string(bs), "}", ",}", 1)
-	}
-
-	return "{}"
-}
-
-func (d *dartG) UpdateVersionChangelog(dartPath string) {
-	// read latest version build from pubspec.yml
-	type t struct {
-		name        string
-		version     string
-		homepage    string
-		description string
-	}
-
-	y := t{}
-
-	data, err := ioutil.ReadFile(filepath.Join(dartPath, "pubspec.yaml"))
-	if err != nil {
-		// TODO: handle err
-		fmt.Println(err)
-	}
-
-	err = yaml.Unmarshal(data, &y)
-	if err != nil {
-		// TODO handle error
-		fmt.Println(err)
-	}
-
-	fmt.Println(y.name)
-	fmt.Println(y.version)
-	fmt.Println(y.homepage)
-	fmt.Println(y.description)
 }
