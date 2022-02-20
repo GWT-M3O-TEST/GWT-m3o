@@ -157,6 +157,16 @@ jobs:
         working-directory: m3o-dart
         run: |
           rm -rf .dart_tool .git .gitignore .packages pubspec.lock
+      
+      - name: update build number
+        working-directory: m3o-dart
+        run: |
+          oldver=$(cat pubspec.yaml | grep version | head -1)
+          oldbuild=$(echo $oldver | awk -F+ '{ print $2 }')
+          newbuild=$(($oldbuild+1))
+          seg=$(echo $oldver | awk -F+ '{ print $1}')
+          newver="$seg+$newbuild"
+          sed -i "s/$oldver/$newver/" pubspec.yaml
 
       # https://stackoverflow.com/questions/58033366/how-to-get-current-branch-within-github-actions
       - name: Extract branch name
@@ -225,6 +235,21 @@ jobs:
           user_name: 'lambdaR'
           use_rsync: true
           commit_message: 'Commit from GWT-M3O-TEST/GWT-m3o action'
+
+      - name: Push Dart pubspec and changelog
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_file: 'm3o-dart/'
+          destination_repo: 'GWT-M3O-TEST/GWT-m3o-dart'
+          destination_branch: ${{ steps.extract_branch.outputs.branch }}
+          git_server: 'github.com'
+          user_email:  'danieljoudat@gmail.com'
+          user_name: 'lambdaR'
+          use_rsync: true
+          commit_message: 'Commit from GWT-M3O-TEST/GWT-m3o action'
       
       - name: Push shell files
         uses: dmnemec/copy_file_to_another_repo_action@main
@@ -242,7 +267,7 @@ jobs:
           use_rsync: true
           commit_message: 'Commit from GWT-M3O_TEST/GWT-m3o action'
 
-      - name: Trigger M3O-Dart Publish Action
+      - name: Trigger M3O-Dart Publish Action.
         run: |
           curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/GWT-m3o-dart/dispatches -d '{"event_type":"publish_dart"}'
         env:
