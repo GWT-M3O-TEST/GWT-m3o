@@ -165,13 +165,6 @@ jobs:
           echo "##[set-output name=newver;]$(echo $newver)"
         id: dart_new_version
 
-      # applying auto-commit for m3o-dart
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: m3o-dart clients release ${{ steps.dart_new_version.outputs.newver }}
-          repository: 'm3o-dart/'
-          tagging_message: ${{ steps.dart_new_version.outputs.newver }}
-          
       - name: house cleaning remove unnecessary files/folders
         working-directory: m3o-dart
         run: |
