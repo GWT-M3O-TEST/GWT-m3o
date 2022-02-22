@@ -153,14 +153,15 @@ jobs:
         working-directory: m3o-dart
         run:  dart pub run build_runner build --delete-conflicting-outputs
 
-      - name: update build number
+      - name: update version number
         working-directory: m3o-dart
         run: |
-          oldver=$(cat pubspec.yaml | grep version | head -1)
-          oldbuild=$(echo $oldver | awk -F+ '{ print $2 }')
-          newbuild=$(($oldbuild+1))
-          seg=$(echo $oldver | awk -F+ '{ print $1}')
-          newver="$seg+$newbuild"
+          oldver=$(cat pubspec.yaml | grep version | head -1) 
+          patch=$(echo $oldver | awk -F. '{ print $3}') 
+          newpatch=$(($patch+1)) 
+          seg1=$(echo $oldver | awk -F. '{ print $1}') 
+          seg2=$(echo $oldver | awk -F. '{ print $2}') 
+          newver="$seg1.$seg2.$newpatch" 
           sed -i "s/$oldver/$newver/" pubspec.yaml
           echo "##[set-output name=newver;]$(echo $newver)"
         id: dart_new_version
@@ -168,7 +169,7 @@ jobs:
       - name: house cleaning remove unnecessary files/folders
         working-directory: m3o-dart
         run: |
-          rm -rf .dart_tool .git .gitignore .packages pubspec.lock
+          rm -rf .dart_tool .gitignore .packages pubspec.lock
           
       # https://stackoverflow.com/questions/58033366/how-to-get-current-branch-within-github-actions
       - name: Extract branch name
