@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	serviceFlag := flag.String("service", "", "the service dir to process")
+	serviceFlag := flag.String("service", ".", "the service dir to process, the default is . which means all")
 	languageFlag := flag.String("lang", "", "the language you want to generate m3o clients e.g go, dart, ts, bash ...")
 	flag.Parse()
 
@@ -81,7 +81,7 @@ func generate(g generator, path, workDir, examplesPath, serviceFlag string, file
 	tsFileList := []string{"esm", "index.js", "index.d.ts"}
 
 	for _, f := range files {
-		if len(serviceFlag) > 0 && f.Name() != serviceFlag {
+		if serviceFlag != "." && f.Name() != serviceFlag {
 			continue
 		}
 		if strings.Contains(f.Name(), "clients") || strings.Contains(f.Name(), "examples") {
