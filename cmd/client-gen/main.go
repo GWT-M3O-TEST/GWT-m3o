@@ -17,14 +17,14 @@ import (
 )
 
 func main() {
-	serviceFlag := flag.String("service", ".", "the service dir to process, the default is . which means all")
+	serviceFlag := flag.String("service", "", "the service dir to process")
 	languageFlag := flag.String("lang", "", "the language you want to generate m3o clients e.g go, dart, ts, bash ...")
 	flag.Parse()
 
 	fmt.Println(flag.Arg(0), flag.Arg(1))
 	fmt.Println(*serviceFlag, *languageFlag)
 
-	files, err := ioutil.ReadDir(*serviceFlag)
+	files, err := ioutil.ReadDir(flag.Arg(0))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func main() {
 			os.Exit(1)
 		}
 		goG := &goG{}
-		generate(goG, goPath, workDir, examplesPath, *serviceFlag, files)
+		generate(goG, goPath, workDir, examplesPath, flag.Arg(0), files)
 	case "dart":
 		dartPath := filepath.Join(workDir, "clients", "dart")
 		err = os.MkdirAll(dartPath, FOLDER_EXECUTE_PERMISSION)
@@ -55,7 +55,7 @@ func main() {
 			os.Exit(1)
 		}
 		dartG := &dartG{}
-		generate(dartG, dartPath, workDir, examplesPath, *serviceFlag, files)
+		generate(dartG, dartPath, workDir, examplesPath, flag.Arg(0), files)
 	case "ts":
 		tsPath := filepath.Join(workDir, "clients", "ts")
 		err = os.MkdirAll(tsPath, FOLDER_EXECUTE_PERMISSION)
@@ -64,7 +64,7 @@ func main() {
 			os.Exit(1)
 		}
 		tsG := &tsG{}
-		generate(tsG, tsPath, workDir, examplesPath, *serviceFlag, files)
+		generate(tsG, tsPath, workDir, examplesPath, flag.Arg(0), files)
 	case "bash":
 		// TODO(daniel) implement the bash section
 	}
