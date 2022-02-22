@@ -37,7 +37,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	switch flag.Arg(1) {
+	switch *languageFlag {
 	case "go":
 		goPath := filepath.Join(workDir, "clients", "go")
 		err = os.MkdirAll(goPath, FOLDER_EXECUTE_PERMISSION)
