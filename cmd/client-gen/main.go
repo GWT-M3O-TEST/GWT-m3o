@@ -71,6 +71,7 @@ func main() {
 }
 
 func generate(g generator, path, workDir, examplesPath, serviceFlag string, files []fs.FileInfo) {
+	log.Println("statring generator ...")
 
 	services := []service{}
 	tsFileList := []string{"esm", "index.js", "index.d.ts"}
