@@ -103,7 +103,7 @@ jobs:
         #   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           rm -rf clients examples
-          client-gen . dart
+          client-gen dart
 
       # - name: Generate beta package
       #   working-directory: services
