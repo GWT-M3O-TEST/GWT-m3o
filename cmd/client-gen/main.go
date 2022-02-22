@@ -46,7 +46,7 @@ func main() {
 			os.Exit(1)
 		}
 		goG := &goG{}
-		generate(goG, goPath, workDir, examplesPath, flag.Arg(0), files)
+		generate(goG, goPath, workDir, examplesPath, *serviceFlag, files)
 	case "dart":
 		dartPath := filepath.Join(workDir, "clients", "dart")
 		err = os.MkdirAll(dartPath, FOLDER_EXECUTE_PERMISSION)
@@ -55,7 +55,7 @@ func main() {
 			os.Exit(1)
 		}
 		dartG := &dartG{}
-		generate(dartG, dartPath, workDir, examplesPath, flag.Arg(0), files)
+		generate(dartG, dartPath, workDir, examplesPath, *serviceFlag, files)
 	case "ts":
 		tsPath := filepath.Join(workDir, "clients", "ts")
 		err = os.MkdirAll(tsPath, FOLDER_EXECUTE_PERMISSION)
@@ -64,7 +64,7 @@ func main() {
 			os.Exit(1)
 		}
 		tsG := &tsG{}
-		generate(tsG, tsPath, workDir, examplesPath, flag.Arg(0), files)
+		generate(tsG, tsPath, workDir, examplesPath, *serviceFlag, files)
 	case "bash":
 		// TODO(daniel) implement the bash section
 	}
