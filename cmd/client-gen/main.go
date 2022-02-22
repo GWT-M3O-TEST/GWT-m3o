@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
@@ -17,27 +16,19 @@ import (
 )
 
 func main() {
-	serviceFlag := flag.String("service", "", "the service dir to process")
-	languageFlag := flag.String("lang", "", "the language you want to generate m3o clients e.g go, dart, ts, bash ...")
+	_ = flag.String("lang", "", "the language you want to generate m3o clients e.g go, dart, ts, bash ...")
 	flag.Parse()
 
-	fmt.Println(flag.Arg(0), flag.Arg(1))
-	fmt.Println(*serviceFlag, *languageFlag)
-
-	files, err := ioutil.ReadDir(flag.Arg(0))
-	if err != nil {
-		log.Fatal(err)
-	}
 	workDir, _ := os.Getwd()
 
 	examplesPath := filepath.Join(workDir, "examples")
-	err = os.MkdirAll(examplesPath, FOLDER_EXECUTE_PERMISSION)
+	err := os.MkdirAll(examplesPath, FOLDER_EXECUTE_PERMISSION)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	switch flag.Arg(1) {
+	switch flag.Arg(0) {
 	case "go":
 		goPath := filepath.Join(workDir, "clients", "go")
 		err = os.MkdirAll(goPath, FOLDER_EXECUTE_PERMISSION)
@@ -46,7 +37,7 @@ func main() {
 			os.Exit(1)
 		}
 		goG := &goG{}
-		generate(goG, goPath, workDir, examplesPath, flag.Arg(0), files)
+		generate(goG, goPath, workDir, examplesPath)
 	case "dart":
 		dartPath := filepath.Join(workDir, "clients", "dart")
 		err = os.MkdirAll(dartPath, FOLDER_EXECUTE_PERMISSION)
@@ -55,7 +46,7 @@ func main() {
 			os.Exit(1)
 		}
 		dartG := &dartG{}
-		generate(dartG, dartPath, workDir, examplesPath, flag.Arg(0), files)
+		generate(dartG, dartPath, workDir, examplesPath)
 	case "ts":
 		tsPath := filepath.Join(workDir, "clients", "ts")
 		err = os.MkdirAll(tsPath, FOLDER_EXECUTE_PERMISSION)
@@ -64,26 +55,28 @@ func main() {
 			os.Exit(1)
 		}
 		tsG := &tsG{}
-		generate(tsG, tsPath, workDir, examplesPath, flag.Arg(0), files)
+		generate(tsG, tsPath, workDir, examplesPath)
 	case "bash":
 		// TODO(daniel) implement the bash section
 	}
 }
 
-func generate(g generator, path, workDir, examplesPath, serviceFlag string, files []fs.FileInfo) {
+func generate(g generator, path, workDir, examplesPath string) {
 	log.Println("statring generator ...")
 	log.Printf("path: %v\n", path)
 	log.Printf("workDir: %v\n", workDir)
 	log.Printf("examplePath: %v\n", examplesPath)
-	log.Printf("serviceFlag: %v\n", serviceFlag)
+
+	files, err := ioutil.ReadDir(".")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	services := []service{}
 	tsFileList := []string{"esm", "index.js", "index.d.ts"}
 
 	for _, f := range files {
-		if serviceFlag != "." && f.Name() != serviceFlag {
-			continue
-		}
+
 		if strings.Contains(f.Name(), "clients") || strings.Contains(f.Name(), "examples") {
 			continue
 		}
