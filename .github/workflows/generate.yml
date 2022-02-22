@@ -169,7 +169,7 @@ jobs:
       - name: house cleaning remove unnecessary files/folders
         working-directory: m3o-dart
         run: |
-          rm -rf .dart_tool .gitignore .packages pubspec.lock
+          rm -rf .dart_tool .git .gitignore .packages pubspec.lock
           
       # https://stackoverflow.com/questions/58033366/how-to-get-current-branch-within-github-actions
       - name: Extract branch name
