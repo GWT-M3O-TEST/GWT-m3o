@@ -24,7 +24,7 @@ func main() {
 	fmt.Println(flag.Arg(0), flag.Arg(1))
 	fmt.Println(*serviceFlag, *languageFlag)
 
-	files, err := ioutil.ReadDir(flag.Arg(0))
+	files, err := ioutil.ReadDir(*serviceFlag)
 	if err != nil {
 		log.Fatal(err)
 	}
