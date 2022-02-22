@@ -17,7 +17,10 @@ import (
 
 func main() {
 	serviceFlag := flag.String("service", "", "the service dir to process")
+	languageFlag := flag.String("lang", "", "the language you want to generate m3o clients e.g go")
 	flag.Parse()
+
+	fmt.Println(*serviceFlag, languageFlag)
 
 	files, err := ioutil.ReadDir(flag.Arg(0))
 	if err != nil {
