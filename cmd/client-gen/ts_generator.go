@@ -180,7 +180,7 @@ func (n *tsG) ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title st
 	}
 }
 
-func (n *tsG) IndexFile(workDir, tsPath string, services []service) {
+func (n *tsG) IndexFile(tsPath string, services []service) {
 	// add file list to gitignore
 	f, err := os.OpenFile(filepath.Join(tsPath, ".gitignore"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
 	//for _, sname := range tsFileList {
@@ -224,6 +224,11 @@ func (n *tsG) IndexFile(workDir, tsPath string, services []service) {
 		fmt.Printf("Problem with prettifying clients index.ts '%v\n", string(outp))
 		os.Exit(1)
 	}
+
+	l := strings.Split(tsPath, "/")
+	l = l[:len(l)-2]
+	workDir := strings.Join(l, "/")
+
 	tsFiles := filepath.Join(workDir, "cmd", "client-gen", "ts")
 	cmd = exec.Command("cp", filepath.Join(tsFiles, "package.json"), filepath.Join(tsFiles, ".gitignore"),
 		filepath.Join(tsFiles, "package-lock.json"), filepath.Join(tsFiles, "package-lock.json"),

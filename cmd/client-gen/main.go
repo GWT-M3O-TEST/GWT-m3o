@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
@@ -17,7 +18,7 @@ import (
 
 func main() {
 	serviceFlag := flag.String("service", "", "the service dir to process")
-	languageFlag := flag.String("lang", "", "the language you want to generate m3o clients e.g go")
+	languageFlag := flag.String("lang", "", "the language you want to generate m3o clients e.g go, dart, ts, bash ...")
 	flag.Parse()
 
 	fmt.Println(flag.Arg(0), flag.Arg(1))
@@ -28,24 +29,7 @@ func main() {
 		log.Fatal(err)
 	}
 	workDir, _ := os.Getwd()
-	tsPath := filepath.Join(workDir, "clients", "ts")
-	err = os.MkdirAll(tsPath, FOLDER_EXECUTE_PERMISSION)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	goPath := filepath.Join(workDir, "clients", "go")
-	err = os.MkdirAll(goPath, FOLDER_EXECUTE_PERMISSION)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	dartPath := filepath.Join(workDir, "clients", "dart")
-	err = os.MkdirAll(dartPath, FOLDER_EXECUTE_PERMISSION)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+
 	examplesPath := filepath.Join(workDir, "examples")
 	err = os.MkdirAll(examplesPath, FOLDER_EXECUTE_PERMISSION)
 	if err != nil {
@@ -53,14 +37,46 @@ func main() {
 		os.Exit(1)
 	}
 
+	switch flag.Arg(1) {
+	case "go":
+		goPath := filepath.Join(workDir, "clients", "go")
+		err = os.MkdirAll(goPath, FOLDER_EXECUTE_PERMISSION)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		goG := &goG{}
+		generate(goG, goPath, workDir, examplesPath, flag.Arg(0), files)
+	case "dart":
+		dartPath := filepath.Join(workDir, "clients", "dart")
+		err = os.MkdirAll(dartPath, FOLDER_EXECUTE_PERMISSION)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		dartG := &dartG{}
+		generate(dartG, dartPath, workDir, examplesPath, flag.Arg(0), files)
+	case "ts":
+		tsPath := filepath.Join(workDir, "clients", "ts")
+		err = os.MkdirAll(tsPath, FOLDER_EXECUTE_PERMISSION)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		tsG := &tsG{}
+		generate(tsG, tsPath, workDir, examplesPath, flag.Arg(0), files)
+	case "bash":
+		// TODO(daniel) implement the bash section
+	}
+}
+
+func generate(g generator, path, workDir, examplesPath, serviceFlag string, files []fs.FileInfo) {
+
 	services := []service{}
 	tsFileList := []string{"esm", "index.js", "index.d.ts"}
-	dartG := &dartG{}
-	goG := &goG{}
-	tsG := &tsG{}
 
 	for _, f := range files {
-		if len(*serviceFlag) > 0 && f.Name() != *serviceFlag {
+		if len(serviceFlag) > 0 && f.Name() != serviceFlag {
 			continue
 		}
 		if strings.Contains(f.Name(), "clients") || strings.Contains(f.Name(), "examples") {
@@ -97,12 +113,8 @@ func main() {
 			}
 			services = append(services, service)
 
-			tsG.ServiceClient(serviceName, tsPath, service)
-			tsG.TopReadme(serviceName, examplesPath, service)
-			dartG.ServiceClient(serviceName, dartPath, service)
-			dartG.TopReadme(serviceName, examplesPath, service)
-			goG.ServiceClient(serviceName, goPath, service)
-			goG.TopReadme(serviceName, examplesPath, service)
+			g.ServiceClient(serviceName, path, service)
+			g.TopReadme(serviceName, examplesPath, service)
 
 			exam, err := ioutil.ReadFile(filepath.Join(workDir, serviceName, "examples.json"))
 			if err != nil {
@@ -123,10 +135,8 @@ func main() {
 					for _, example := range examples {
 						title := regexp.MustCompile("[^a-zA-Z0-9]+").ReplaceAllString(strcase.LowerCamelCase(strings.Replace(example.Title, " ", "_", -1)), "")
 
-						dartG.ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title, service, example)
-						goG.ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title, service, example)
-						tsG.ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title, service, example)
-						curlExample(examplesPath, serviceName, endpoint, title, service, example)
+						g.ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title, service, example)
+						// curlExample(examplesPath, serviceName, endpoint, title, service, example)
 					}
 				}
 			} else {
@@ -135,9 +145,7 @@ func main() {
 		}
 	}
 
-	goG.IndexFile(goPath, services)
-	// dartG.IndexFile(dartPath, services)
-	tsG.IndexFile(workDir, tsPath, services)
+	g.IndexFile(path, services)
 
 	// publishToNpm(tsPath, tsFileList)
 }

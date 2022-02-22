@@ -40,10 +40,10 @@ type example struct {
 }
 
 type generator interface {
-	ServiceClient(serviceName, dartPath string, service service)
+	ServiceClient(serviceName, path string, service service)
 	TopReadme(serviceName, examplesPath string, service service)
 	ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title string, service service, example example)
-	IndexFile(goPath string, services []service)
+	IndexFile(path string, services []service)
 	schemaToType(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string
 }
 
