@@ -20,6 +20,7 @@ func main() {
 	languageFlag := flag.String("lang", "", "the language you want to generate m3o clients e.g go")
 	flag.Parse()
 
+	fmt.Println(flag.Arg(0), flag.Arg(1))
 	fmt.Println(*serviceFlag, *languageFlag)
 
 	files, err := ioutil.ReadDir(flag.Arg(0))
