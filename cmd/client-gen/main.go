@@ -72,6 +72,10 @@ func main() {
 
 func generate(g generator, path, workDir, examplesPath, serviceFlag string, files []fs.FileInfo) {
 	log.Println("statring generator ...")
+	log.Printf("path: %v\n", path)
+	log.Printf("workDir: %v\n", workDir)
+	log.Printf("examplePath: %v\n", examplesPath)
+	log.Printf("serviceFlag: %v\n", serviceFlag)
 
 	services := []service{}
 	tsFileList := []string{"esm", "index.js", "index.d.ts"}
