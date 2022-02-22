@@ -153,7 +153,7 @@ jobs:
         working-directory: m3o-dart
         run:  dart pub run build_runner build --delete-conflicting-outputs
 
-      - name: update dart version number
+      - name: update dart version number in pubspec file
         working-directory: m3o-dart
         run: |
           oldver=$(cat pubspec.yaml | grep version | head -1) 
