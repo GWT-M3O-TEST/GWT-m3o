@@ -19,7 +19,7 @@ jobs:
         id: go
 
       - name: Set up dart latest
-        uses: dart-lang/setup-dart@v1
+        uses: dart-lang/setup-dart@v1.3
         with:
           sdk:  stable
         id: dart
