@@ -57,7 +57,8 @@ func (d *dartG) ServiceClient(serviceName, dartPath string, service service) {
 }
 
 func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
-
+	var jsonInt64 = `@JsonKey(fromJson: int64FromString, toJson: int64ToString)
+	{{ .type }}? {{ .parameter }}`
 	var normalType = `{{ .type }}? {{ .parameter }}`
 	var arrayType = `List<{{ .type }}>? {{ .parameter }}`
 	var mapType = `Map<{{ .type1 }}, {{ .type2 }}>? {{ .parameter }}`
@@ -133,12 +134,18 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 			o = runTemplate("normal", normalType, payload)
 		case "number":
 			switch meta.Value.Format {
-			case "int32", "int64":
+			case "int32":
 				payload := map[string]interface{}{
 					"type":      int64Type,
 					"parameter": p,
 				}
 				o = runTemplate("normal", normalType, payload)
+			case "int64":
+				payload := map[string]interface{}{
+					"type":      int64Type,
+					"parameter": p,
+				}
+				o = runTemplate("jsonInt64", jsonInt64, payload)
 			case "float", "double":
 				payload := map[string]interface{}{
 					"type":      doubleType,
