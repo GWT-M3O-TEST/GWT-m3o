@@ -12,9 +12,8 @@ import (
 )
 
 const (
-	url    = "https://github.com/micro/services.git"
 	owner  = "micro"
-	repo   = "micro"
+	repo   = "services"
 	branch = "master"
 )
 
