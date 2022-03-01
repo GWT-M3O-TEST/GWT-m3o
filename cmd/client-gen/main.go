@@ -56,8 +56,9 @@ func main() {
 		}
 		tsG := &tsG{}
 		generate(tsG, tsPath, workDir, examplesPath)
-	case "bash":
-		// TODO(daniel) implement the bash section
+	case "shell":
+		shellG := &shellG{}
+		generate(shellG, "", workDir, examplesPath)
 	}
 }
 
@@ -134,7 +135,6 @@ func generate(g generator, path, workDir, examplesPath string) {
 						title := regexp.MustCompile("[^a-zA-Z0-9]+").ReplaceAllString(strcase.LowerCamelCase(strings.Replace(example.Title, " ", "_", -1)), "")
 
 						g.ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title, service, example)
-						// curlExample(examplesPath, serviceName, endpoint, title, service, example)
 					}
 				}
 			} else {

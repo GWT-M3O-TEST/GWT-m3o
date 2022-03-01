@@ -8,10 +8,31 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/stoewer/go-strcase"
 )
 
-func curlExample(examplesPath, serviceName, endpoint, title string, service service, example example) {
+type shellG struct {
+	generator
+	// add appropriate fields
+}
+
+// We implement an empty methods (except for ExampleAndReadmeEdit) in order to satisfy
+// the generator interface.
+func (s *shellG) ServiceClient(serviceName, dartPath string, service service) {
+}
+
+func (s *shellG) schemaToType(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
+	return ""
+}
+
+func (s *shellG) IndexFile(dartPath string, services []service) {
+}
+
+func (s *shellG) TopReadme(serviceName, examplesPath string, service service) {
+}
+
+func (s *shellG) ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title string, service service, example example) {
 	// curl example
 	templ, err := template.New("curl" + serviceName + endpoint).Funcs(funcMap()).Parse(curlExampleTemplate)
 	if err != nil {
