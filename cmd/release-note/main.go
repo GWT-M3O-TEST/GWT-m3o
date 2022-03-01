@@ -1,3 +1,9 @@
+// The purpose of this program is to fetch the latest commit
+// metadata (sha, html_url and message)from the micro/services
+// repo to populate the release note in the m3o/m3o-dart repo.
+// Used in the “generate latest release note from micro/services repo”
+// step in the generate.yml file at the m3o/m3o-dart repo.
+
 package main
 
 import (
