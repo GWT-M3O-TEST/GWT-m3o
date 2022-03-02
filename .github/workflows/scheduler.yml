@@ -10,12 +10,7 @@ on:
       - 'cmd/release-note/**'
 
   repository_dispatch:
-    types: 
-      - build_m3o_client
-      - build_dart
-      - build_go
-      - build_ts
-      - build_shell
+    types: [build_m3o_client,build_dart,build_go,build_ts,build_shell]
 
 jobs:
   disply-eventaction:
@@ -24,6 +19,7 @@ jobs:
       - name: echo github.event.action
         run: |
           echo ${{ github.event_name }}
+          echo ${{ github.event.action }}
 
   generate:
     if: ${{ github.event.action == 'build_m3o_client' }}
