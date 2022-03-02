@@ -23,8 +23,8 @@ jobs:
     steps:
       - name: echo github.event.action
         run: |
-          echo ${{ github.event.action }}
-          
+          echo ${{ github.event }}
+
   generate:
     if: ${{ github.event.action == 'build_m3o_client' }}
     runs-on: ubuntu-latest
