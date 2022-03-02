@@ -18,7 +18,15 @@ on:
       - build_shell
 
 jobs:
+  disply-eventaction:
+    runs-on: ubuntu-latest
+    steps:
+      - name: echo github.event.action
+        run: |
+          echo ${{ github.event.action }}
+          
   generate:
+    if: ${{ github.event.action == 'build_m3o_client' }}
     runs-on: ubuntu-latest
     steps:
       - name: Trigger m3o/m3o-dart
