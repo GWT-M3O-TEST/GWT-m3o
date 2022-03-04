@@ -22,7 +22,7 @@ jobs:
           echo ${{ github.event.action }}
 
   generate:
-    if: ${{ github.event.action == 'build_m3o_client' }}
+    if: ${{ github.event_name == 'push' || github.event.action == 'build_m3o_client' }}
     runs-on: ubuntu-latest
     steps:
       - name: Trigger m3o/m3o-dart
