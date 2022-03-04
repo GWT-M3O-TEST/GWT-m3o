@@ -1,7 +1,7 @@
 package main
 
 const cliExampleTemplate = `{{ $reqType := requestType .endpoint }}{{ $service := .service -}}
-m3o {{ $service.Name }} {{ .endpoint }} {{ cliExampleRequest .example.ShellRequest }}`
+m3o {{ $service.Name }} {{ .endpoint }} {{ cliExampleRequest .example }}`
 
 // const cliExampleTemplate = `{{ $reqType := requestType .endpoint }}{{ $service := .service -}}
 // {{ if isCustomShell .example }}
