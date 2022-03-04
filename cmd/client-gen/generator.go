@@ -156,6 +156,13 @@ func funcMap() map[string]interface{} {
 		"dartExampleRequest": func(exampleJSON map[string]interface{}) string {
 			return schemaToDartExample(exampleJSON)
 		},
+		"cliExampleRequest": func(exampleJSON map[string]interface{}) string {
+			s := ""
+			for key, value := range exampleJSON {
+				s += "--" + key + "=" + value.(string) + " "
+			}
+			return s
+		},
 	}
 }
 
