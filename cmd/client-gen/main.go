@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	_ = flag.String("lang", "", "the language you want to generate m3o clients e.g go, dart, ts, bash ...")
+	_ = flag.String("lang", "", "the language you want to generate m3o clients e.g go, dart, ts, shell, cli ...")
 	flag.Parse()
 
 	workDir, _ := os.Getwd()
@@ -59,6 +59,9 @@ func main() {
 	case "shell":
 		shellG := &shellG{}
 		generate(shellG, "", workDir, examplesPath)
+	case "cli":
+		cliG := &cliG{}
+		generate(cliG, "", workDir, examplesPath)
 	}
 }
 
