@@ -76,10 +76,10 @@ func (c *cliG) ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title s
 }
 
 func schemaToCLIExample(exampleJSON map[string]interface{}) string {
-	type jsonObj map[string]interface{}
+	// type jsonObj map[string]interface{}
 	s := ""
 	for key, value := range exampleJSON {
-		fmt.Println(value)
+		// fmt.Println(value)
 		switch value.(type) {
 		case float64:
 			val := value.(float64)
@@ -89,7 +89,7 @@ func schemaToCLIExample(exampleJSON map[string]interface{}) string {
 			s += "--" + key + "=" + fmt.Sprint(val) + " "
 		case string:
 			s += "--" + key + "=" + "\"" + value.(string) + "\"" + " "
-		case jsonObj:
+		case interface{}:
 			bs, _ := json.MarshalIndent(value, "", "  ")
 			s += "--" + key + "=" + "\"" + string(bs) + "\"" + " "
 		}
