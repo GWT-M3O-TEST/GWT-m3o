@@ -83,15 +83,15 @@ func schemaToCLIExample(exampleJSON map[string]interface{}) string {
 		switch value.(type) {
 		case float64:
 			val := value.(float64)
-			s += "--" + key + "=" + fmt.Sprint(val) + " "
+			s += "--" + key + "=" + fmt.Sprint(val) + "\n\t\t"
 		case int64:
 			val := value.(int64)
-			s += "--" + key + "=" + fmt.Sprint(val) + " "
+			s += "--" + key + "=" + fmt.Sprint(val) + "\n\t\t"
 		case string:
-			s += "--" + key + "=" + "\"" + value.(string) + "\"" + " "
+			s += "--" + key + "=" + "\"" + value.(string) + "\"" + "\n\t\t"
 		case interface{}:
 			bs, _ := json.MarshalIndent(value, "", "  ")
-			s += "--" + key + "=" + "\"" + string(bs) + "\"" + " "
+			s += "--" + key + "=" + "\"" + string(bs) + "\"" + "\n\t\t"
 		}
 	}
 	return s
