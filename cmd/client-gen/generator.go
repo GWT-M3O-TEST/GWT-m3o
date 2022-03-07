@@ -157,20 +157,7 @@ func funcMap() map[string]interface{} {
 			return schemaToDartExample(exampleJSON)
 		},
 		"cliExampleRequest": func(exampleJSON map[string]interface{}) string {
-			s := ""
-			for key, value := range exampleJSON {
-				switch value.(type) {
-				case float64:
-					val := value.(float64)
-					s += "--" + key + "=" + fmt.Sprint(val) + " "
-				case int64:
-					val := value.(int64)
-					s += "--" + key + "=" + fmt.Sprint(val) + " "
-				case string:
-					s += "--" + key + "=" + "\"" + value.(string) + "\"" + " "
-				}
-			}
-			return s
+			return schemaToCLIExample(exampleJSON)
 		},
 	}
 }

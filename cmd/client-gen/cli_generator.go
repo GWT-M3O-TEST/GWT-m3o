@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -72,4 +73,25 @@ func (c *cliG) ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title s
 		fmt.Println("Failed to append to schema file", err)
 		os.Exit(1)
 	}
+}
+
+func schemaToCLIExample(exampleJSON map[string]interface{}) string {
+	type jsonObj map[string]interface{}
+	s := ""
+	for key, value := range exampleJSON {
+		switch value.(type) {
+		case float64:
+			val := value.(float64)
+			s += "--" + key + "=" + fmt.Sprint(val) + " "
+		case int64:
+			val := value.(int64)
+			s += "--" + key + "=" + fmt.Sprint(val) + " "
+		case string:
+			s += "--" + key + "=" + "\"" + value.(string) + "\"" + " "
+		case jsonObj:
+			bs, _ := json.MarshalIndent(exampleJSON, "", "  ")
+			s += "--" + key + "=" + "\"" + string(bs) + "\"" + " "
+		}
+	}
+	return s
 }
