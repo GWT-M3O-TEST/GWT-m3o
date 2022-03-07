@@ -89,7 +89,8 @@ func schemaToCLIExample(exampleJSON map[string]interface{}) string {
 		case string:
 			s += "--" + key + "=" + "\"" + value.(string) + "\"" + " "
 		case jsonObj:
-			bs, _ := json.MarshalIndent(exampleJSON, "", "  ")
+			fmt.Println("case jsonObj here .....")
+			bs, _ := json.MarshalIndent(value, "", "  ")
 			s += "--" + key + "=" + "\"" + string(bs) + "\"" + " "
 		}
 	}
