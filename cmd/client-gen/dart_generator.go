@@ -145,7 +145,8 @@ func (d *dartG) schemaToType(serviceName, typeName string, schemas map[string]*o
 					"type":      int64Type,
 					"parameter": p,
 				}
-				o = runTemplate("jsonInt64", normalType, payload)
+				// o = runTemplate("jsonInt64", jsonType, payload)
+				o = runTemplate("normal", normalType, payload)
 			case "float", "double":
 				payload := map[string]interface{}{
 					"type":      doubleType,
