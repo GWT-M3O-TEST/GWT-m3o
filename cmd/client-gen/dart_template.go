@@ -38,7 +38,7 @@ class {{title $service.Name}}Service {
 			}
 			return {{ $endpointName }}ResponseData.fromJson(res.body);
 		  } catch (e, stack) {
-			print(stack)  
+			print(stack);  
 			throw Exception(e);
 		  }
 	}{{end}}
@@ -60,7 +60,7 @@ class {{title $service.Name}}Service {
 				}
 			}
 		} catch (e, stack) {
-			print(stack)
+			print(stack);
 			throw Exception(e);
 		}
 	}{{end}}{{end}}
@@ -126,7 +126,7 @@ void main() async {
 	  {{ end }}
   } catch (e, stack) {
     print(e);
-	print(stack)
+	print(stack);
   } finally {
     exit(0);
   }
@@ -184,8 +184,9 @@ void main() async {
 		Merr: ({{ title .endpoint }}ResponseMerr err) => print(err.body));
 	  }	
 	{{- end }}
-  } catch (e) {
+  } catch (e, stack) {
     print(e);
+	print(stack);
   } finally {
     exit(0);
   }
