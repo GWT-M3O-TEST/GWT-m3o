@@ -104,5 +104,5 @@ func schemaToCLIExample(exampleJSON map[string]interface{}) string {
 			}
 		}
 	}
-	return s
+	return strings.TrimSuffix(s, "\\")
 }
