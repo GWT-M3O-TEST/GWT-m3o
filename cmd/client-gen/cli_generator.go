@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -91,7 +92,12 @@ func schemaToCLIExample(exampleJSON map[string]interface{}) string {
 			s += "\t--" + key + "=" + "\"" + value.(string) + "\"" + " \\\n"
 		case interface{}:
 			bs, _ := json.MarshalIndent(value, "", "  ")
-			s += "\t--" + key + "=" + "'" + string(bs) + "'" + " \\\n"
+			jsonList := strings.Split(string(bs), "\n")
+			s += "\t--" + key + "=" + "'" + jsonList[0] + "'" + " \\\n"
+			spacer := strings.Repeat(" ", 2+len(key))
+			for _, line := range jsonList[1:] {
+				s += "\t--" + spacer + line + "\n"
+			}
 		}
 	}
 	return s
