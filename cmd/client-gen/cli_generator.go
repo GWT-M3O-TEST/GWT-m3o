@@ -97,7 +97,7 @@ func schemaToCLIExample(exampleJSON map[string]interface{}) string {
 			spacer := strings.Repeat(" ", 4+len(key))
 			for index, line := range jsonList[1:] {
 				if index == len(jsonList)-2 {
-					s += "\t" + spacer + line + "'\n"
+					s += "\t" + spacer + line + "' \\\n"
 				} else {
 					s += "\t" + spacer + line + "\n"
 				}
