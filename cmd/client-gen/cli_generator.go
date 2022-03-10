@@ -93,10 +93,10 @@ func schemaToCLIExample(exampleJSON map[string]interface{}) string {
 		case interface{}:
 			bs, _ := json.MarshalIndent(value, "", "  ")
 			jsonList := strings.Split(string(bs), "\n")
-			s += "\t--" + key + "=" + "'" + jsonList[0] + "'" + " \\\n"
-			spacer := strings.Repeat(" ", 2+len(key))
+			s += "\t--" + key + "=" + "'" + jsonList[0] + " \\\n"
+			spacer := strings.Repeat(" ", 4+len(key))
 			for _, line := range jsonList[1:] {
-				s += "\t--" + spacer + line + "\n"
+				s += "\t" + spacer + line + "\n"
 			}
 		}
 	}
