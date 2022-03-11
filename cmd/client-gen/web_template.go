@@ -1,24 +1,48 @@
 package main
 
+// Range over endpoint attributes
+// for property, val := range meta.Value.Properties {
+// 	propDescription := val.Value.Description
+// 	fmt.Println("attribute:", property)
+// 	fmt.Println("placeholder:", propDescription)
+// }
+
 const webHTMLServiceTemplate = `
 {{ $service := .service -}}
-{{ range $key, $req := $service.Spec.Components.RequestBodies }}{{ $reqType := requestType $key }}{{ $endpointName := requestTypeToEndpointName $key}}
 <html>
   <body>
-    <div id="client">
-      <form id="client-call" onsubmit="call()">
+    <div id="{{ $service.Name }}">
+      <form id="{{ .endpoint }}" onsubmit="call()">
         <div>
-          <input name="token" id="token" placeholder="token">
+            <label for="service"><b>{{ $service.Name }}</b></label>
+            <input type="hidden" name="service" id="service">
         </div>
         <div>
-          <input name="service" id="service" placeholder="{{ $service.Name }}">
+            <label for="endpoint"><b>{{ .endpoint }}</b></label>
+            <input type="hidden" name="endpoint" id="endpoint">
         </div>
+		<i>{{ .epdesc }}</i>
+		</br>
+		</br>
+		<label for="token">token </label>
         <div>
-          <input name="endpoint" name="endpoint" placeholder="{{ $endpointName }}">
+            <input name="token" id="token" placeholder="token">
         </div>
+		</br>
+		{{- range $property, $val := .properties }}
+		{{- if not (eq $val.Value.Type "object") }}
+		<label for="{{ $property }}">{{ $property }} </label>
         <div>
-          <textarea rows=5 cols=30 name="request" id="request">{}</textarea>
+            <input name="{{ $property }}" id="{{ $property }}" placeholder="{{ $val.Value.Description }}">
         </div>
+		{{- end }}
+		{{- if eq $val.Value.Type "object" }}
+		<label for="{{ $property }}">{{ $property }} </label>
+        <div>
+            <textarea rows=5 cols=30 name="{{ $property }}" id="{{ $property }}" placeholder="{{ $val.Value.Description }}">{}</textarea>
+        </div>
+		{{- end }}
+		{{- end }}
         <button>Submit</button>
       </form>
     </div>
@@ -26,20 +50,18 @@ const webHTMLServiceTemplate = `
   </body>
   <script src="index.js"></script>
 </html>
-{{ end }}
 `
 
 const webJSServiceTemplate = `
 {{ $service := .service -}}
-{{ range $key, $req := $service.Spec.Components.RequestBodies }}{{ $reqType := requestType $key }}{{ $endpointName := requestTypeToEndpointName $key}}
 class {{ title $service.Name }} {
 	constructor(token) {
 	  this.token = token;
 	}
   
-	call({{ $service.Name }}, {{ $endpointName }}, request, callback) {
+	call({{ $service.Name }}, {{ .endpoint }}, request, callback) {
 	  // e.g /v1/helloworld/Call
-	  var path = "/v1/" + {{ $service.Name }} + "/" + {{ $endpointName }}
+	  var path = "/v1/" + {{ $service.Name }} + "/" + {{ .endpoint }}
   
 	  var xmlHttp = new XMLHttpRequest();
 	  xmlHttp.onreadystatechange = function () {
@@ -54,17 +76,18 @@ class {{ title $service.Name }} {
   }
   
   function call() {
-		var form = document.getElementById("client-call");
+		var form = document.getElementById("{{ .endpoint }}");
 		var token = form.elements["token"].value;
 		var service = form.elements["service"].value;
 		var endpoint = form.elements["endpoint"].value;
-		var request = form.elements["request"].value;
+		{{ range $property, $val := .properties -}}
+		var {{ $property }} = form.elements["{{ $property }}"].value;
+		{{ end }}
   
 		var m3o = new Client(token);
   
-		m3o.call({{ $service.Name }}, {{ $endpointName }}, request, function(response) {
+		m3o.call({{ $service.Name }}, {{ .endpoint }}, request, function(response) {
 		  document.getElementById("response").innerText = response;
 		});
   }
-{{ end }}  
 `
