@@ -56,6 +56,15 @@ func main() {
 		}
 		tsG := &tsG{}
 		generate(tsG, tsPath, workDir, examplesPath)
+	case "web":
+		webPath := filepath.Join(workDir, "clients", "web")
+		err = os.MkdirAll(webPath, FOLDER_EXECUTE_PERMISSION)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		webG := &webG{}
+		generate(webG, webPath, workDir, examplesPath)
 	case "shell":
 		shellG := &shellG{}
 		generate(shellG, "", workDir, examplesPath)

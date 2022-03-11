@@ -159,6 +159,9 @@ func funcMap() map[string]interface{} {
 		"cliExampleRequest": func(exampleJSON map[string]interface{}) string {
 			return schemaToCLIExample(exampleJSON)
 		},
+		"webExampleRequest": func(exampleJSON map[string]interface{}) string {
+			return schemaToWebExample(exampleJSON)
+		},
 	}
 }
 
