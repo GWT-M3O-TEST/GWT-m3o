@@ -1,6 +1,8 @@
 package main
 
-const webHTMLServiceTemplate = `{{ $reqType := requestType .endpoint }}{{ $service := .service -}}
+const webHTMLServiceTemplate = `
+{{ $service := .service -}}
+{{ range $key, $req := $service.Spec.Components.RequestBodies }}{{ $reqType := requestType $key }}{{ $endpointName := requestTypeToEndpointName $key}}
 <html>
   <body>
     <div id="client">
@@ -12,7 +14,7 @@ const webHTMLServiceTemplate = `{{ $reqType := requestType .endpoint }}{{ $servi
           <input name="service" id="service" placeholder="{{ $service.Name }}">
         </div>
         <div>
-          <input name="endpoint" name="endpoint" placeholder="{{ .endpoint }}">
+          <input name="endpoint" name="endpoint" placeholder="{{ $endpointName }}">
         </div>
         <div>
           <textarea rows=5 cols=30 name="request" id="request">{}</textarea>
@@ -25,15 +27,17 @@ const webHTMLServiceTemplate = `{{ $reqType := requestType .endpoint }}{{ $servi
   <script src="index.js"></script>
 </html>`
 
-const webJSServiceTemplate = `{{ $reqType := requestType .endpoint }}{{ $service := .service -}}
+const webJSServiceTemplate = `
+{{ $service := .service -}}
+{{ range $key, $req := $service.Spec.Components.RequestBodies }}{{ $reqType := requestType $key }}{{ $endpointName := requestTypeToEndpointName $key}}
 class {{ title $service.Name }} {
 	constructor(token) {
 	  this.token = token;
 	}
   
-	call({{ $service.Name }}, {{ .endpoint }}, request, callback) {
+	call({{ $service.Name }}, {{ $endpointName }}, request, callback) {
 	  // e.g /v1/helloworld/Call
-	  var path = "/v1/" + {{ $service.Name }} + "/" + {{ .endpoint }}
+	  var path = "/v1/" + {{ $service.Name }} + "/" + {{ $endpointName }}
   
 	  var xmlHttp = new XMLHttpRequest();
 	  xmlHttp.onreadystatechange = function () {
@@ -56,7 +60,7 @@ class {{ title $service.Name }} {
   
 		var m3o = new Client(token);
   
-		m3o.call({{ $service.Name }}, {{ .endpoint }}, request, function(response) {
+		m3o.call({{ $service.Name }}, {{ $endpointName }}, request, function(response) {
 		  document.getElementById("response").innerText = response;
 		});
   }  
