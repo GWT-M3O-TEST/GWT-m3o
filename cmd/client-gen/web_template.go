@@ -25,7 +25,9 @@ const webHTMLServiceTemplate = `
     <div id="response"></div>
   </body>
   <script src="index.js"></script>
-</html>`
+</html>
+{{ end }}
+`
 
 const webJSServiceTemplate = `
 {{ $service := .service -}}
@@ -63,5 +65,6 @@ class {{ title $service.Name }} {
 		m3o.call({{ $service.Name }}, {{ $endpointName }}, request, function(response) {
 		  document.getElementById("response").innerText = response;
 		});
-  }  
+  }
+{{ end }}  
 `
