@@ -12,14 +12,14 @@ const webHTMLServiceTemplate = `
 <html>
   <body>
     <div id="{{ $service.Name }}">
-      <form id="{{ .endpoint }}" onsubmit="call()">
+      <form id="{{ untitle .endpoint }}" onsubmit="{{ untitle .endpoint }}()">
         <div>
             <label for="service"><b>{{ $service.Name }}</b></label>
-            <input type="hidden" name="service" id="service">
+            <input type="hidden" name="service" id="service" value="{{ $service.Name }}">
         </div>
         <div>
             <label for="endpoint"><b>{{ .endpoint }}</b></label>
-            <input type="hidden" name="endpoint" id="endpoint">
+            <input type="hidden" name="endpoint" id="endpoint" value="{{ .endpoint }}">
         </div>
 		<i>{{ .epdesc }}</i>
 		</br>
@@ -48,7 +48,7 @@ const webHTMLServiceTemplate = `
     </div>
     <div id="response"></div>
   </body>
-  <script src="index.js"></script>
+  <script src="{{ untitle .endpoint }}.js"></script>
 </html>
 `
 
@@ -59,34 +59,46 @@ class {{ title $service.Name }} {
 	  this.token = token;
 	}
   
-	call({{ $service.Name }}, {{ .endpoint }}, request, callback) {
+	call(service, endpoint, request, callback) {
 	  // e.g /v1/helloworld/Call
-	  var path = "/v1/" + {{ $service.Name }} + "/" + {{ .endpoint }}
+	  var path = "/v1/" + service + "/" + endpoint
   
 	  var xmlHttp = new XMLHttpRequest();
-	  xmlHttp.onreadystatechange = function () {
-		if (xmlHttp.readyState == 4);
-		callback(xmlHttp.responseText, xmlHttp.status);
-	  };
 	  xmlHttp.open("POST", "https://api.m3o.com" + path, true); // true for asynchronous
 	  xmlHttp.setRequestHeader("Authorization", "Bearer " + this.token);
 	  xmlHttp.setRequestHeader("Content-Type", "application/json");
+	  
+	  xmlHttp.onreadystatechange = function () {
+		if(xmlHttp.readyState === 4) {
+			var status = xmlHttp.status;
+			if (status === 0 || (status >= 200 && status < 400)) {
+			  callback(xmlHttp.responseText);
+			} else {
+			
+			}
+		}
+	  };
+
 	  xmlHttp.send(request);
 	}
   }
   
-  function call() {
-		var form = document.getElementById("{{ .endpoint }}");
-		var token = form.elements["token"].value;
-		var service = form.elements["service"].value;
-		var endpoint = form.elements["endpoint"].value;
-		{{ range $property, $val := .properties -}}
-		var {{ $property }} = form.elements["{{ $property }}"].value;
+  function {{ untitle .endpoint }}() {
+		var token = document.getElementById("token").value;
+		var service = document.getElementById("service").value;
+		var endpoint = document.getElementById("endpoint").value;
+		{{- range $property, $val := .properties }}
+		var {{ $property }} = document.getElementById("{{ $property }}").value;
+		{{- end }}
+		var obj = new Object();
+		{{- range $property, $val := .properties }}
+		obj.{{ $property }} = {{ $property }};
 		{{ end }}
+		var request = JSON.stringify(obj);
   
-		var m3o = new Client(token);
+		var m3o = new {{ title $service.Name }}(token);
   
-		m3o.call({{ $service.Name }}, {{ .endpoint }}, request, function(response) {
+		m3o.call(service, endpoint, request, function(response) {
 		  document.getElementById("response").innerText = response;
 		});
   }
