@@ -10,7 +10,7 @@ on:
       - 'cmd/release-note/**'
 
   repository_dispatch:
-    types: [build_m3o_client,build_dart,build_go,build_ts,build_shell]
+    types: [build_m3o_client,build_dart,build_go,build_ts,build_shell,build_web]
 
 jobs:
   disply-eventaction:
@@ -48,6 +48,11 @@ jobs:
       - name: Trigger m3o/m3o-cli
         run: |
           curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/GWT-m3o-cli/dispatches -d '{"event_type":"build_publish_cli"}'
+        env:
+          GH_PAT: ${{ secrets.API_TOKEN_GITHUB }}
+      - name: Trigger m3o/m3o-web
+        run: |
+          curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/GWT-m3o-web/dispatches -d '{"event_type":"build_publish_web"}'
         env:
           GH_PAT: ${{ secrets.API_TOKEN_GITHUB }}
 
@@ -88,5 +93,15 @@ jobs:
       - name: Trigger m3o/m3o-sh
         run: |
           curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/GWT-m3o-sh/dispatches -d '{"event_type":"build_publish_shell"}'
+        env:
+          GH_PAT: ${{ secrets.API_TOKEN_GITHUB }}
+
+  generate-web:
+    if: ${{ github.event.action == 'build_web' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger m3o/m3o-web
+        run: |
+          curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/GWT-m3o-web/dispatches -d '{"event_type":"build_publish_web"}'
         env:
           GH_PAT: ${{ secrets.API_TOKEN_GITHUB }}
