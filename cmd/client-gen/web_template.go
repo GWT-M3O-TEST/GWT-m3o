@@ -54,52 +54,23 @@ const webHTMLServiceTemplate = `
 
 const webJSServiceTemplate = `
 {{ $service := .service -}}
-class {{ title $service.Name }} {
-	constructor(token) {
-	  this.token = token;
-	}
-  
-	call(service, endpoint, request, callback) {
-	  // e.g /v1/helloworld/Call
-	  var path = "/v1/" + service + "/" + endpoint
-  
-	  var xmlHttp = new XMLHttpRequest();
-	  xmlHttp.open("POST", "https://api.m3o.com" + path, true); // true for asynchronous
-	  xmlHttp.setRequestHeader("Authorization", "Bearer " + this.token);
-	  xmlHttp.setRequestHeader("Content-Type", "application/json");
-	  
-	  xmlHttp.onreadystatechange = function () {
-		if(xmlHttp.readyState === 4) {
-			var status = xmlHttp.status;
-			if (status === 0 || (status >= 200 && status < 400)) {
-			  callback(xmlHttp.responseText);
-			} else {
-			
-			}
-		}
-	  };
+function {{ untitle .endpoint }}() {
+	var token = document.getElementById("token").value;
+	var service = document.getElementById("service").value;
+	var endpoint = document.getElementById("endpoint").value;
+	{{- range $property, $val := .properties }}
+	var {{ $property }} = document.getElementById("{{ $property }}").value;
+	{{- end }}
+	var obj = new Object();
+	{{- range $property, $val := .properties }}
+	obj.{{ $property }} = {{ $property }};
+	{{ end }}
+	var request = JSON.stringify(obj);
 
-	  xmlHttp.send(request);
-	}
-  }
-  
-  function {{ untitle .endpoint }}() {
-		var token = document.getElementById("token").value;
-		var service = document.getElementById("service").value;
-		var endpoint = document.getElementById("endpoint").value;
-		{{- range $property, $val := .properties }}
-		var {{ $property }} = document.getElementById("{{ $property }}").value;
-		{{- end }}
-		var obj = new Object();
-		{{- range $property, $val := .properties }}
-		obj.{{ $property }} = {{ $property }};
-		{{ end }}
-		var request = JSON.stringify(obj);
-  
-		var m3o = new {{ title $service.Name }}(token);
-  
-		m3o.call(service, endpoint, request, function(response) {
-		  document.getElementById("response").innerText = response;
-		});
-  }
+	var m3o = new Client(token);
+
+	m3o.call(service, endpoint, request, function(response) {
+		document.getElementById("response").innerText = response;
+	});
+}
 `
