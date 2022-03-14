@@ -9,7 +9,7 @@ package main
 
 const webHTMLServiceTemplate = `
 {{ $service := .service -}}
-<html>
+<!DOCTYPE html>
   <body>
     <div id="{{ $service.Name }}">
       <form id="{{ untitle .endpoint }}" onsubmit="{{ $service.Name }}{{ .endpoint }}()">
@@ -54,10 +54,10 @@ const webHTMLServiceTemplate = `
 
 const webJSServiceTemplate = `
 {{ $service := .service -}}
-import Client from '../../client/index';
+import Client from '../../client/index.js';
 
 function {{ $service.Name }}{{ .endpoint }}() {
-	var form = form.elements["{{ untitle .endpoint }}"].value;
+	var form = document.getElementById("{{ untitle .endpoint }}").value;
 	var token = form.elements["token"].value;
 	var service = form.elements["service"].value;
 	var endpoint = form.elements["endpoint"].value;
