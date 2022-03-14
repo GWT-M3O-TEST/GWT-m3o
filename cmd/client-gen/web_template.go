@@ -12,7 +12,7 @@ const webHTMLServiceTemplate = `
 <html>
   <body>
     <div id="{{ $service.Name }}">
-      <form id="{{ untitle .endpoint }}" onsubmit="{{ untitle .endpoint }}()">
+      <form id="{{ untitle .endpoint }}" onsubmit="{{ $service.Name }}{{ .endpoint }}()">
         <div>
             <label for="service"><b>{{ $service.Name }}</b></label>
             <input type="hidden" name="service" id="service" value="{{ $service.Name }}">
@@ -48,7 +48,7 @@ const webHTMLServiceTemplate = `
     </div>
     <div id="response"></div>
   </body>
-  <script src="{{ untitle .endpoint }}.js"></script>
+  <script type="module" src="{{ untitle .endpoint }}.js"></script>
 </html>
 `
 
@@ -56,12 +56,13 @@ const webJSServiceTemplate = `
 {{ $service := .service -}}
 import Client from '../../client/index';
 
-function {{ untitle .endpoint }}() {
-	var token = document.getElementById("token").value;
-	var service = document.getElementById("service").value;
-	var endpoint = document.getElementById("endpoint").value;
+function {{ $service.Name }}{{ .endpoint }}() {
+	var form = form.elements["{{ untitle .endpoint }}"].value;
+	var token = form.elements["token"].value;
+	var service = form.elements["service"].value;
+	var endpoint = form.elements["endpoint"].value;
 	{{- range $property, $val := .properties }}
-	var {{ $property }} = document.getElementById("{{ $property }}").value;
+	var {{ $property }} = form.elements["{{ $property }}"].value;
 	{{- end }}
 	var obj = new Object();
 	{{- range $property, $val := .properties }}
