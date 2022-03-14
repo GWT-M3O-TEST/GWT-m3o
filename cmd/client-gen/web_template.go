@@ -54,6 +54,8 @@ const webHTMLServiceTemplate = `
 
 const webJSServiceTemplate = `
 {{ $service := .service -}}
+import Client from '../../client/index';
+
 function {{ untitle .endpoint }}() {
 	var token = document.getElementById("token").value;
 	var service = document.getElementById("service").value;
