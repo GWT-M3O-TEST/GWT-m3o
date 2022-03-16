@@ -94,7 +94,7 @@ window.{{ $service.Name }}{{ .endpoint }} = function () {
 	let m3o = new Client(token);
 
 	m3o.call(service, endpoint, request, function(response) {
-		document.getElementById("response").innerText = response;
+		document.getElementById("json").innerText = response;
 	});
 }
 `
