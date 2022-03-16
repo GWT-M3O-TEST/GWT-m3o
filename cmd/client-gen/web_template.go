@@ -57,7 +57,11 @@ const webHTMLServiceTemplate = `
     		</div>
     		<div class="col-6">
 				<p class="fs-1 fw-bold text-center">JSON</p>
-				<div id="json"></div>
+				<div>
+					<pre>
+						<code id="json"></code>
+					</pre>
+				</div>
     		</div>
     		<div class="col">
 				<p class="fs-1 fw-bold text-center">ViewTree</p>
@@ -65,7 +69,6 @@ const webHTMLServiceTemplate = `
     		</div>
   		</div>
 	</div>
-	<div id="response"></div>
 	</body>
 	<script type="module" src="{{ untitle .endpoint }}.js"></script>
 </html>
