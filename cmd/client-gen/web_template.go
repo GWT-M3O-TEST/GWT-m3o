@@ -48,7 +48,7 @@ const webHTMLServiceTemplate = `
 				{{- if eq $val.Value.Type "object" }}
 				<div class="mb-3">
               		<label for="{{ $property }}" class="form-label">{{ $property }}</label>
-              		<textarea class="form-control" id="{{ $property }}" placeholder="{{ $val.Value.Description }}">
+              		<textarea rows="4" class="form-control" id="{{ $property }}" placeholder="{{ $val.Value.Description }}"></textarea>
             	</div>
 				{{- end }}
 				{{- end }}
