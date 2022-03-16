@@ -10,45 +10,64 @@ package main
 const webHTMLServiceTemplate = `
 {{ $service := .service -}}
 <!DOCTYPE html>
-  <body>
-    <div id="{{ $service.Name }}">
-      <form id="{{ untitle .endpoint }}">
-        <div>
-            <label for="service"><b>{{ $service.Name }}</b></label>
-            <input type="hidden" name="service" id="service" value="{{ $service.Name }}">
-        </div>
-        <div>
-            <label for="endpoint"><b>{{ .endpoint }}</b></label>
-            <input type="hidden" name="endpoint" id="endpoint" value="{{ .endpoint }}">
-        </div>
-	      <i>{{ .epdesc }}</i>
-    		</br>
-    		</br>
-	      <label for="token">token </label>
-        <div>
-            <input name="token" id="token" placeholder="token">
-        </div>
-		    </br>
-    		{{- range $property, $val := .properties }}
-    		{{- if not (eq $val.Value.Type "object") }}
-	      <label for="{{ $property }}">{{ $property }} </label>
-        <div>
-            <input name="{{ $property }}" id="{{ $property }}" placeholder="{{ $val.Value.Description }}">
-        </div>
-    		{{- end }}
-    		{{- if eq $val.Value.Type "object" }}
-	      <label for="{{ $property }}">{{ $property }} </label>
-        <div>
-            <textarea rows=5 cols=30 name="{{ $property }}" id="{{ $property }}" placeholder="{{ $val.Value.Description }}">{}</textarea>
-        </div>
-    		{{- end }}
-    		{{- end }}
-        <button type="button" onclick="{{ $service.Name }}{{ .endpoint }}()">Submit</button>
-      </form>
-    </div>
-    <div id="response"></div>
-  </body>
-  <script type="module" src="{{ untitle .endpoint }}.js"></script>
+	<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- Bootstrap CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+	<title>M3O Web</title>
+	</head>
+	<body>
+	<div id="{{ $service.Name }}" class="container">
+		<div class="row">
+    		<div class="col">
+			<form id="{{ untitle .endpoint }}">
+				<div class="mb-3">
+					<label for="service" class="form-label fs-1 fw-bold">{{ $service.Name }}</label>
+					<input type="hidden" class="form-control" id="service" value="{{ $service.Name }}">
+		  		</div>
+				<div class="mb-3">
+					<label for="endpoint" class="form-label fs-2 fw-bold">{{ .endpoint }}</label>
+				  	<input type="hidden" class="form-control" id="endpoint" value="{{ .endpoint }}">
+				  	<div id="endpointDesc" class="form-text"><i>{{ .epdesc }}</i></div>
+				</div>
+				<div class="mb-3">
+              		<label for="token" class="form-label">Token</label>
+              		<input class="form-control" id="token">
+            	</div>
+				{{- range $property, $val := .properties }}
+				{{- if not (eq $val.Value.Type "object") }}
+				<div class="mb-3">
+              		<label for="{{ $property }}" class="form-label">{{ $property }}</label>
+              		<input class="form-control" id="{{ $property }}" placeholder="{{ $val.Value.Description }}">
+            	</div>
+				{{- end }}
+				{{- if eq $val.Value.Type "object" }}
+				<div class="mb-3">
+              		<label for="{{ $property }}" class="form-label">{{ $property }}</label>
+              		<textarea ows=5 cols=30 class="form-control" id="{{ $property }}" placeholder="{{ $val.Value.Description }}">
+            	</div>
+				{{- end }}
+				{{- end }}
+				<button type="button" class="btn btn-primary" onclick="{{ $service.Name }}{{ .endpoint }}()">Submit</button>
+			</form>
+    		</div>
+    		<div class="col-6">
+				<p class="fs-1 fw-bold text-center">JSON</p>
+				<div id="json"></div>
+    		</div>
+    		<div class="col">
+				<p class="fs-1 fw-bold text-center">ViewTree</p>
+				<div id="viewtree"></div>
+    		</div>
+  		</div>
+	</div>
+	<div id="response"></div>
+	</body>
+	<script type="module" src="{{ untitle .endpoint }}.js"></script>
 </html>
 `
 
