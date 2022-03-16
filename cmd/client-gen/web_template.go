@@ -57,12 +57,11 @@ const webJSServiceTemplate = `
 import Client from '../../client/index.js';
 
 window.{{ $service.Name }}{{ .endpoint }} = function () {
-	let form = document.getElementById("{{ untitle .endpoint }}").value;
-	let token = form.elements["token"].value;
-	let service = form.elements["service"].value;
-	let endpoint = form.elements["endpoint"].value;
+	let token = document.getElementById("token").value;
+	let service = document.getElementById("service").value;
+	let endpoint = document.getElementById("endpoint").value;
 	{{- range $property, $val := .properties }}
-	let {{ $property }} = form.elements["{{ $property }}"].value;
+	let {{ $property }} = document.getElementById("{{ $property }}").value;
 	{{- end }}
 	let obj = new Object();
 	{{- range $property, $val := .properties }}
