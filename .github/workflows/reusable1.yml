@@ -27,7 +27,7 @@ jobs:
       - name: Check m3o repo
         uses: actions/checkout@v2
         with:
-          repository: 'm3o/m3o'
+          repository: 'GWT-M3O-TEST/m3o'
           path: m3o
 
       - name: Check micro/services repo
