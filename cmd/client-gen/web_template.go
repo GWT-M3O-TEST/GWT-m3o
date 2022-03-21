@@ -38,7 +38,7 @@ const webHTMLServiceTemplate = `
               		<label for="token" class="form-label">Token</label>
               		<input class="form-control" id="token">
             	</div>
-				{{- range $property, $val := .properties }}
+				{{- range $property, $val := .reqProperties }}
 				{{- if not (eq $val.Value.Type "object") }}
 				<div class="mb-3">
               		<label for="{{ $property }}" class="form-label">{{ $property }}</label>
@@ -68,6 +68,8 @@ const webHTMLServiceTemplate = `
 				<div id="viewtree"></div>
     		</div>
   		</div>
+  		</br>
+  		<div class="row" id="restable"></div>
 	</div>
 	</body>
 	<script type="module" src="{{ untitle .endpoint }}.js"></script>
@@ -82,19 +84,45 @@ window.{{ $service.Name }}{{ .endpoint }} = function () {
 	let token = document.getElementById("token").value;
 	let service = document.getElementById("service").value;
 	let endpoint = document.getElementById("endpoint").value;
-	{{- range $property, $val := .properties }}
-	let {{ $property }} = document.getElementById("{{ $property }}").value;
+	{{- range $reqproperty, $val := .reqProperties }}
+	let {{ $reqproperty }} = document.getElementById("{{ $reqproperty }}").value;
 	{{- end }}
 	let obj = new Object();
-	{{- range $property, $val := .properties }}
-	obj.{{ $property }} = {{ $property }};
+	{{- range $reqproperty, $val := .reqProperties }}
+	obj.{{ $reqproperty }} = {{ $reqproperty }};
 	{{ end }}
 	let request = JSON.stringify(obj);
 
 	let m3o = new Client(token);
 
 	m3o.call(service, endpoint, request, function(response) {
-		document.getElementById("json").innerText = response;
+		resObj = JSON.parse(response);
+		let res =` + "`" + `<table class="table">
+		<thead>
+		  <tr>
+			{{- range $resproperty, $val := .resProperties }}
+			<th scope="col">{{ $resproperty }}</th>
+			{{ end }}
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr>
+			<td>Mark</td>
+			<td>Otto</td>
+			<td>@mdo</td>
+		  </tr>
+		  <tr>
+			<td>Jacob</td>
+			<td>Thornton</td>
+			<td>@fat</td>
+		  </tr>
+		  <tr>
+			<td colspan="2">Larry the Bird</td>
+			<td>@twitter</td>
+		  </tr>
+		</tbody>
+	  </table>` + "`" + `
+		document.getElementById("restable").innerHTML = res;
 	});
 }
 `
