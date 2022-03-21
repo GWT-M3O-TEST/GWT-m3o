@@ -57,6 +57,7 @@ func (w *webG) ServiceClient(serviceName, webPath string, service service) {
 		}
 
 		if parts[len(parts)-1] == "Response" {
+			endpoint = strings.Join(parts[:len(parts)-1], "")
 			resProperties = meta.Value.Properties
 		}
 
