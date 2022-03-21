@@ -1,4 +1,4 @@
-name: M3O Client Generation Scheduler.
+name: M3O Client Generation Scheduler
 on:
   push:
     branches:
@@ -25,11 +25,11 @@ jobs:
     if: ${{ github.event_name == 'push' || github.event.action == 'build_m3o_client' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger m3o/m3o-dart
-        run: |
-          curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-dart/dispatches -d '{"event_type":"build_publish_dart"}'
-        env:
-          GH_PAT: ${{ secrets.API_TOKEN_GITHUB }}
+      # - name: Trigger m3o/m3o-dart
+      #   run: |
+      #     curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-dart/dispatches -d '{"event_type":"build_publish_dart"}'
+      #   env:
+      #     GH_PAT: ${{ secrets.API_TOKEN_GITHUB }}
       # - name: Trigger m3o/m3o-go
       #   run: |
       #     curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-go/dispatches -d '{"event_type":"build_publish_go"}'
