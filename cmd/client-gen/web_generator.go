@@ -92,10 +92,10 @@ func ServiceClientHelper(serviceName, webPath, endpoint, endPointDesc string,
 	b_html := bytes.Buffer{}
 	buf_html := bufio.NewWriter(&b_html)
 	err := tempHTML.Execute(buf_html, map[string]interface{}{
-		"service":       service,
-		"endpoint":      endpoint,
-		"epdesc":        endPointDesc,
-		"reqProperties": reqPro,
+		"service":  service,
+		"endpoint": endpoint,
+		"epdesc":   endPointDesc,
+		"reqps":    reqPro,
 	})
 	if err != nil {
 		fmt.Println("Failed to unmarshal", err)
@@ -106,11 +106,11 @@ func ServiceClientHelper(serviceName, webPath, endpoint, endPointDesc string,
 	b_js := bytes.Buffer{}
 	buf_js := bufio.NewWriter(&b_js)
 	err = tempJS.Execute(buf_js, map[string]interface{}{
-		"service":       service,
-		"endpoint":      endpoint,
-		"epdesc":        endPointDesc,
-		"reqProperties": reqPro,
-		"resProperties": resPro,
+		"service":  service,
+		"endpoint": endpoint,
+		"epdesc":   endPointDesc,
+		"reqps":    reqPro,
+		"resps":    resPro,
 	})
 
 	if err != nil {

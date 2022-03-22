@@ -38,17 +38,17 @@ const webHTMLServiceTemplate = `
               		<label for="token" class="form-label">Token</label>
               		<input class="form-control" id="token">
             	</div>
-				{{- range $property, $val := .reqProperties }}
+				{{- range $reqp, $val := .reqps }}
 				{{- if not (eq $val.Value.Type "object") }}
 				<div class="mb-3">
-              		<label for="{{ $property }}" class="form-label">{{ $property }}</label>
-              		<input class="form-control" id="{{ $property }}" placeholder="{{ $val.Value.Description }}">
+              		<label for="{{ $reqp }}" class="form-label">{{ $reqp }}</label>
+              		<input class="form-control" id="{{ $reqp }}" placeholder="{{ $val.Value.Description }}">
             	</div>
 				{{- end }}
 				{{- if eq $val.Value.Type "object" }}
 				<div class="mb-3">
-              		<label for="{{ $property }}" class="form-label">{{ $property }}</label>
-              		<textarea rows="4" class="form-control" id="{{ $property }}" placeholder="{{ $val.Value.Description }}"></textarea>
+              		<label for="{{ $reqp }}" class="form-label">{{ $reqp }}</label>
+              		<textarea rows="4" class="form-control" id="{{ $reqp }}" placeholder="{{ $val.Value.Description }}"></textarea>
             	</div>
 				{{- end }}
 				{{- end }}
@@ -84,24 +84,24 @@ window.{{ $service.Name }}{{ .endpoint }} = function () {
 	let token = document.getElementById("token").value;
 	let service = document.getElementById("service").value;
 	let endpoint = document.getElementById("endpoint").value;
-	{{- range $reqproperty, $val := .reqProperties }}
-	let {{ $reqproperty }} = document.getElementById("{{ $reqproperty }}").value;
+	{{- range $reqp, $val := .reqps }}
+	let {{ $reqp }} = document.getElementById("{{ $reqp }}").value;
 	{{- end }}
 	let obj = new Object();
-	{{- range $reqproperty, $val := .reqProperties }}
-	obj.{{ $reqproperty }} = {{ $reqproperty }};
+	{{- range $reqp, $val := .reqProperties }}
+	obj.{{ $reqp }} = {{ $reqp }};
 	{{ end }}
 	let request = JSON.stringify(obj);
 
 	let m3o = new Client(token);
 
 	m3o.call(service, endpoint, request, function(response) {
-		resObj = JSON.parse(response);
+		// resObj = JSON.parse(response);
 		let res =` + "`" + `<table class="table">
 		<thead>
 		  <tr>
-			{{- range $resproperty, $val := .resProperties }}
-			<th scope="col">{{ $resproperty }}</th>
+			{{- range $resp, $val := .resps }}
+			<th scope="col">{{ $resp }}</th>
 			{{ end }}
 		  </tr>
 		</thead>
