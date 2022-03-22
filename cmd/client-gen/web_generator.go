@@ -49,9 +49,9 @@ func (w *webG) ServiceClient(serviceName, webPath string, service service) {
 		// handling the request
 		if parts[len(parts)-1] == "Request" {
 			endpoint := strings.Join(parts[:len(parts)-1], "")
-			endpointDesc := meta.Value.Description
+			endPointDesc := meta.Value.Description
 			reqProperties := meta.Value.Properties
-			ServiceClientHelper(serviceName, webPath, endpoint, endpointDesc,
+			ServiceClientHelper(serviceName, webPath, endpoint, endPointDesc,
 				reqProperties, nil, tempHTML, tempJS, service)
 		}
 
