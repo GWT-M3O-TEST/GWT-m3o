@@ -1,4 +1,4 @@
-name: M3O Client Generation Scheduler
+name: M3O Client Generation Scheduler.
 on:
   push:
     branches:
