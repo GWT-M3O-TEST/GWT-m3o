@@ -41,28 +41,82 @@ func (w *webG) ServiceClient(serviceName, webPath string, service service) {
 		os.Exit(1)
 	}
 
-	// loop over schemas
-	for schema, meta := range service.Spec.Components.Schemas {
+	schemas := service.Spec.Components.Schemas
+
+	for schema, meta := range schemas {
 
 		parts := camelcase.Split(schema)
+		endpoint := strings.Join(parts[:len(parts)-1], "")
+		schemaSuffix := parts[len(parts)-1]
+		// traversing schemas are not necessary in order, sometime the [endpoint]Response
+		// comes before the [endpoint]Request in the api-[service].json file.
+		if schemaSuffix == "Request" {
 
-		// handling the request
-		if parts[len(parts)-1] == "Request" {
-			endpoint := strings.Join(parts[:len(parts)-1], "")
-			endPointDesc := meta.Value.Description
-			reqProperties := meta.Value.Properties
-			ServiceClientHelper(serviceName, webPath, endpoint, endPointDesc,
-				reqProperties, nil, tempHTML, tempJS, service)
+			// applying paresd HTML template to m3o services
+			b_html := bytes.Buffer{}
+			buf_html := bufio.NewWriter(&b_html)
+			err = tempHTML.Execute(buf_html, map[string]interface{}{
+				"service":  service,
+				"schemas":  schemas,
+				"endpoint": endpoint,
+				"reqps":    meta.Value.Properties,
+			})
+			if err != nil {
+				fmt.Println("Failed to unmarshal", err)
+				os.Exit(1)
+			}
+
+			// applying paresd JS template to m3o services
+			b_js := bytes.Buffer{}
+			buf_js := bufio.NewWriter(&b_js)
+			err = tempJS.Execute(buf_js, map[string]interface{}{
+				"service":  service,
+				"schemas":  schemas,
+				"endpoint": endpoint,
+				"reqps":    meta.Value.Properties,
+			})
+			if err != nil {
+				fmt.Println("Failed to unmarshal", err)
+				os.Exit(1)
+			}
+
+			endpoint = strings.ToLower(endpoint)
+
+			// create folder for endpoint
+			err = os.MkdirAll(filepath.Join(webPath, serviceName, endpoint), FOLDER_EXECUTE_PERMISSION)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+
+			// create html file
+			htmlFile := filepath.Join(webPath, serviceName, endpoint, fmt.Sprint(endpoint, ".html"))
+			f, err := os.OpenFile(htmlFile, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
+			if err != nil {
+				fmt.Println("Failed to open schema file", err)
+				os.Exit(1)
+			}
+			buf_html.Flush()
+			_, err = f.Write(b_html.Bytes())
+			if err != nil {
+				fmt.Println("Failed to append to schema file", err)
+				os.Exit(1)
+			}
+
+			// create js file
+			jsFile := filepath.Join(webPath, serviceName, endpoint, fmt.Sprint(endpoint, ".js"))
+			f, err = os.OpenFile(jsFile, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
+			if err != nil {
+				fmt.Println("Failed to open schema file", err)
+				os.Exit(1)
+			}
+			buf_js.Flush()
+			_, err = f.Write(b_js.Bytes())
+			if err != nil {
+				fmt.Println("Failed to append to schema file", err)
+				os.Exit(1)
+			}
 		}
-
-		// handling the response
-		if parts[len(parts)-1] == "Response" {
-			endpoint := strings.Join(parts[:len(parts)-1], "")
-			resProperties := meta.Value.Properties
-			ServiceClientHelper(serviceName, webPath, endpoint, "",
-				nil, resProperties, tempHTML, tempJS, service)
-		}
-
 	}
 }
 
@@ -88,71 +142,13 @@ func ServiceClientHelper(serviceName, webPath, endpoint, endPointDesc string,
 	tempHTML, tempJS *template.Template,
 	service service) {
 
-	// applying paresd html template to m3o services
-	b_html := bytes.Buffer{}
-	buf_html := bufio.NewWriter(&b_html)
-	err := tempHTML.Execute(buf_html, map[string]interface{}{
-		"service":  service,
-		"endpoint": endpoint,
-		"epdesc":   endPointDesc,
-		"reqps":    reqPro,
-	})
-	if err != nil {
-		fmt.Println("Failed to unmarshal", err)
-		os.Exit(1)
+	fmt.Println("endpoint=>", endpoint)
+	fmt.Println("endpointDesc=>", endPointDesc)
+	for pro := range reqPro {
+		fmt.Println("req=>", pro)
+	}
+	for pro := range resPro {
+		fmt.Println("res=>", pro)
 	}
 
-	// applying paresd js template to m3o services
-	b_js := bytes.Buffer{}
-	buf_js := bufio.NewWriter(&b_js)
-	err = tempJS.Execute(buf_js, map[string]interface{}{
-		"service":  service,
-		"endpoint": endpoint,
-		"epdesc":   endPointDesc,
-		"reqps":    reqPro,
-		"resps":    resPro,
-	})
-
-	if err != nil {
-		fmt.Println("Failed to unmarshal", err)
-		os.Exit(1)
-	}
-
-	// lower case the endpoint name
-	endpoint = strings.ToLower(endpoint)
-
-	// create folder for endpoint
-	err = os.MkdirAll(filepath.Join(webPath, serviceName, endpoint), FOLDER_EXECUTE_PERMISSION)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	// create html file
-	htmlFile := filepath.Join(webPath, serviceName, endpoint, fmt.Sprint(endpoint, ".html"))
-	f, err := os.OpenFile(htmlFile, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
-	if err != nil {
-		fmt.Println("Failed to open schema file", err)
-		os.Exit(1)
-	}
-	buf_html.Flush()
-	_, err = f.Write(b_html.Bytes())
-	if err != nil {
-		fmt.Println("Failed to append to schema file", err)
-		os.Exit(1)
-	}
-
-	// create js file
-	jsFile := filepath.Join(webPath, serviceName, endpoint, fmt.Sprint(endpoint, ".js"))
-	f, err = os.OpenFile(jsFile, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
-	if err != nil {
-		fmt.Println("Failed to open schema file", err)
-		os.Exit(1)
-	}
-	buf_js.Flush()
-	_, err = f.Write(b_js.Bytes())
-	if err != nil {
-		fmt.Println("Failed to append to schema file", err)
-		os.Exit(1)
-	}
 }

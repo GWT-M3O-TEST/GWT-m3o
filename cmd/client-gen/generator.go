@@ -66,8 +66,21 @@ func funcMap() map[string]interface{} {
 		return false
 	}
 	return map[string]interface{}{
+		"title": strings.Title,
+		"untitle": func(t string) string {
+			return strcase.LowerCamelCase(t)
+		},
 		"isCustomShell": func(ex example) bool {
 			return len(ex.ShellRequest) > 0
+		},
+		"isStream": isStream,
+		"isNotStream": func(spec *openapi3.Swagger, serviceName, requestType string) bool {
+			return !isStream(spec, serviceName, requestType)
+		},
+		"isResponse": func(typeName string) bool {
+			// return true if typeName has 'Response' as suffix.
+			// this is primarily used in dart template.
+			return strings.HasSuffix(typeName, "Response")
 		},
 		"recursiveTypeDefinitionGo": func(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
 			gog := &goG{}
@@ -85,6 +98,14 @@ func funcMap() map[string]interface{} {
 			parts := camelcase.Split(requestType)
 			return strings.Join(parts[1:len(parts)-1], "")
 		},
+		"requestTypeToResponseType": func(requestType string) string {
+			parts := camelcase.Split(requestType)
+			return strings.Join(parts[1:len(parts)-1], "") + "Response"
+		},
+		"requestTypeToEndpointPath": func(requestType string) string {
+			parts := camelcase.Split(requestType)
+			return strings.Title(strings.Join(parts[1:len(parts)-1], ""))
+		},
 		// strips service name from the request type
 		"requestType": func(requestType string) string {
 			// @todo hack to support examples
@@ -93,19 +114,6 @@ func funcMap() map[string]interface{} {
 			}
 			parts := camelcase.Split(requestType)
 			return strings.Join(parts[1:], "")
-		},
-		"isStream": isStream,
-		"isNotStream": func(spec *openapi3.Swagger, serviceName, requestType string) bool {
-			return !isStream(spec, serviceName, requestType)
-		},
-		"isResponse": func(typeName string) bool {
-			// return true if typeName has 'Response' as suffix.
-			// this is primarily used in dart template.
-			return strings.HasSuffix(typeName, "Response")
-		},
-		"requestTypeToResponseType": func(requestType string) string {
-			parts := camelcase.Split(requestType)
-			return strings.Join(parts[1:len(parts)-1], "") + "Response"
 		},
 		"endpointComment": func(endpoint string, schemas map[string]*openapi3.SchemaRef) string {
 			v := schemas[strings.Title(endpoint)+"Request"]
@@ -138,13 +146,17 @@ func funcMap() map[string]interface{} {
 			}
 			return ret
 		},
-		"requestTypeToEndpointPath": func(requestType string) string {
-			parts := camelcase.Split(requestType)
-			return strings.Title(strings.Join(parts[1:len(parts)-1], ""))
-		},
-		"title": strings.Title,
-		"untitle": func(t string) string {
-			return strcase.LowerCamelCase(t)
+		"responsePropertiesFromSchemas": func(endpoint string, schemas map[string]*openapi3.SchemaRef) map[string]*openapi3.SchemaRef {
+			var resPrs map[string]*openapi3.SchemaRef
+			for schema, meta := range schemas {
+				parts := camelcase.Split(schema)
+				ep := strings.Join(parts[:len(parts)-1], "")
+				schemaSuffix := parts[len(parts)-1]
+				if ep == endpoint && schemaSuffix == "Response" {
+					resPrs = meta.Value.Properties
+				}
+			}
+			return resPrs
 		},
 		"goExampleRequest": func(serviceName, endpoint string, schemas map[string]*openapi3.SchemaRef, exampleJSON map[string]interface{}) string {
 			return schemaToGoExample(serviceName, strings.Title(endpoint)+"Request", schemas, exampleJSON)

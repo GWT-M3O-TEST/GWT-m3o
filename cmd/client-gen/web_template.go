@@ -8,7 +8,6 @@ package main
 // }
 
 const webHTMLServiceTemplate = `
-{{ $service := .service -}}
 <!DOCTYPE html>
 	<head>
 	<!-- Required meta tags -->
@@ -21,38 +20,40 @@ const webHTMLServiceTemplate = `
 	<title>M3O Web</title>
 	</head>
 	<body>
-	<div id="{{ $service.Name }}" class="container">
+	<div id="{{ .service.Name }}" class="container">
 		<div class="row">
     		<div class="col">
 			<form id="{{ untitle .endpoint }}">
 				<div class="mb-3">
-					<label for="service" class="form-label fs-1 fw-bold">{{ $service.Name }}</label>
-					<input type="hidden" class="form-control" id="service" value="{{ $service.Name }}">
+					<label for="service" class="form-label fs-1 fw-bold">{{ .service.Name }}</label>
+					<input type="hidden" class="form-control" id="service" value="{{ .service.Name }}">
 		  		</div>
 				<div class="mb-3">
-					<label for="endpoint" class="form-label fs-2 fw-bold">{{ .endpoint }}</label>
+					<label for="endpoint" class="form-label fs-3 fw-bold">{{ .endpoint }}</label>
 				  	<input type="hidden" class="form-control" id="endpoint" value="{{ .endpoint }}">
-				  	<div id="endpointDesc" class="form-text"><i>{{ .epdesc }}</i></div>
+				  	<div id="endpointDesc" class="form-text"><i>{{ endpointDescription .endpoint .schemas }}</i></div>
 				</div>
 				<div class="mb-3">
-              		<label for="token" class="form-label">Token</label>
+              		<label for="token" class="form-label fs-5">Token</label>
               		<input class="form-control" id="token">
             	</div>
 				{{- range $reqp, $val := .reqps }}
 				{{- if not (eq $val.Value.Type "object") }}
 				<div class="mb-3">
-              		<label for="{{ $reqp }}" class="form-label">{{ $reqp }}</label>
-              		<input class="form-control" id="{{ $reqp }}" placeholder="{{ $val.Value.Description }}">
+              		<label for="{{ $reqp }}" class="form-label fs-5">{{ $reqp }}</label>
+					<div class="form-text"><i>{{ $val.Value.Description }}</i></div>
+              		<input class="form-control" id="{{ $reqp }}">
             	</div>
 				{{- end }}
 				{{- if eq $val.Value.Type "object" }}
 				<div class="mb-3">
-              		<label for="{{ $reqp }}" class="form-label">{{ $reqp }}</label>
-              		<textarea rows="4" class="form-control" id="{{ $reqp }}" placeholder="{{ $val.Value.Description }}"></textarea>
+              		<label for="{{ $reqp }}" class="form-label fs-5">{{ $reqp }}</label>
+					<div class="form-text"><i>{{ $val.Value.Description }}</i></div>
+              		<textarea rows="4" class="form-control" id="{{ $reqp }}"></textarea>
             	</div>
 				{{- end }}
 				{{- end }}
-				<button type="button" class="btn btn-primary" onclick="{{ $service.Name }}{{ .endpoint }}()">Submit</button>
+				<button type="button" class="btn btn-primary" onclick="{{ .service.Name }}{{ .endpoint }}()">Submit</button>
 			</form>
     		</div>
     		<div class="col-6">
@@ -77,10 +78,9 @@ const webHTMLServiceTemplate = `
 `
 
 const webJSServiceTemplate = `
-{{- $service := .service }}
 import Client from '../../client/index.js';
 
-window.{{ $service.Name }}{{ .endpoint }} = function () {
+window.{{ .service.Name }}{{ .endpoint }} = function () {
 	let token = document.getElementById("token").value;
 	let service = document.getElementById("service").value;
 	let endpoint = document.getElementById("endpoint").value;
@@ -88,7 +88,7 @@ window.{{ $service.Name }}{{ .endpoint }} = function () {
 	let {{ $reqp }} = document.getElementById("{{ $reqp }}").value;
 	{{- end }}
 	let obj = new Object();
-	{{- range $reqp, $val := .reqProperties }}
+	{{- range $reqp, $val := .reqps }}
 	obj.{{ $reqp }} = {{ $reqp }};
 	{{ end }}
 	let request = JSON.stringify(obj);
@@ -100,7 +100,7 @@ window.{{ $service.Name }}{{ .endpoint }} = function () {
 		let res =` + "`" + `<table class="table">
 		<thead>
 		  <tr>
-			{{- range $resp, $val := .resps }}
+			{{- range $resp, $val := responsePropertiesFromSchemas .endpoint .schemas }}
 			<th scope="col">{{ $resp }}</th>
 			{{ end }}
 		  </tr>
