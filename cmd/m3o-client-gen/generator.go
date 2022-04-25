@@ -81,6 +81,10 @@ func funcMap() map[string]interface{} {
 			dartg := &dartG{}
 			return dartg.schemaToType(serviceName, typeName, schemas)
 		},
+		"recursiveTypeDefinitionKotlin": func(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
+			kotling := &kotlinG{}
+			return kotling.schemaToType(serviceName, typeName, schemas)
+		},
 		"requestTypeToEndpointName": func(requestType string) string {
 			parts := camelcase.Split(requestType)
 			return strings.Join(parts[1:len(parts)-1], "")

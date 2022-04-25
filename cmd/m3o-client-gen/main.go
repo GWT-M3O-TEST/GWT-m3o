@@ -56,6 +56,15 @@ func main() {
 		}
 		tsG := &tsG{}
 		generate(tsG, tsPath, workDir, examplesPath)
+	case "kotlin":
+		kotlinPath := filepath.Join(workDir, "clients", "kotlin")
+		err = os.MkdirAll(kotlinPath, FOLDER_EXECUTE_PERMISSION)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		kotlinG := &kotlinG{}
+		generate(kotlinG, kotlinPath, workDir, examplesPath)
 	case "shell":
 		shellG := &shellG{}
 		generate(shellG, "", workDir, examplesPath)
