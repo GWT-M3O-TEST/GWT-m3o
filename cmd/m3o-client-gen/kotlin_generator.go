@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"text/template"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -54,141 +53,142 @@ func (k *kotlinG) ServiceClient(serviceName, kotlinPath string, service service)
 }
 
 func (k *kotlinG) schemaToType(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
-	var jsonInt64 = `
-	@JsonKey(fromJson: int64FromString, toJson: int64ToString)
-	{{ .type }}? {{ .parameter }}
-	`
-	var normalType = `{{ .type }}? {{ .parameter }}`
-	var arrayType = `List<{{ .type }}>? {{ .parameter }}`
-	var mapType = `Map<{{ .type1 }}, {{ .type2 }}>? {{ .parameter }}`
-	var anyType = `dynamic {{ .parameter }}`
-	var jsonType = "Map<String, dynamic>"
-	var stringType = "String"
-	var int64Type = "int"
-	var doubleType = "double"
-	var boolType = "bool"
+	// var jsonInt64 = `
+	// @JsonKey(fromJson: int64FromString, toJson: int64ToString)
+	// {{ .type }}? {{ .parameter }}
+	// `
+	// var normalType = `{{ .type }}? {{ .parameter }}`
+	// var arrayType = `List<{{ .type }}>? {{ .parameter }}`
+	// var mapType = `Map<{{ .type1 }}, {{ .type2 }}>? {{ .parameter }}`
+	// var anyType = `dynamic {{ .parameter }}`
+	// var jsonType = "Map<String, dynamic>"
+	// var stringType = "String"
+	// var int64Type = "int"
+	// var doubleType = "double"
+	// var boolType = "bool"
 
-	runTemplate := func(tmpName, temp string, payload map[string]interface{}) string {
-		t, err := template.New(tmpName).Parse(temp)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to parse %s - err: %v\n", temp, err)
-			return ""
-		}
-		var tb bytes.Buffer
-		err = t.Execute(&tb, payload)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "faild to apply parsed template %s to payload %v - err: %v\n", temp, payload, err)
-			return ""
-		}
+	// runTemplate := func(tmpName, temp string, payload map[string]interface{}) string {
+	// 	t, err := template.New(tmpName).Parse(temp)
+	// 	if err != nil {
+	// 		fmt.Fprintf(os.Stderr, "failed to parse %s - err: %v\n", temp, err)
+	// 		return ""
+	// 	}
+	// 	var tb bytes.Buffer
+	// 	err = t.Execute(&tb, payload)
+	// 	if err != nil {
+	// 		fmt.Fprintf(os.Stderr, "faild to apply parsed template %s to payload %v - err: %v\n", temp, payload, err)
+	// 		return ""
+	// 	}
 
-		return tb.String()
-	}
+	// 	return tb.String()
+	// }
 
-	typesMapper := func(t string) string {
-		switch t {
-		case "STRING":
-			return stringType
-		case "INT32", "INT64":
-			return int64Type
-		case "DOUBLE", "FLOAT":
-			return doubleType
-		case "BOOL":
-			return boolType
-		case "JSON":
-			return jsonType
-		default:
-			return t
-		}
-	}
+	// typesMapper := func(t string) string {
+	// 	switch t {
+	// 	case "STRING":
+	// 		return stringType
+	// 	case "INT32", "INT64":
+	// 		return int64Type
+	// 	case "DOUBLE", "FLOAT":
+	// 		return doubleType
+	// 	case "BOOL":
+	// 		return boolType
+	// 	case "JSON":
+	// 		return jsonType
+	// 	default:
+	// 		return t
+	// 	}
+	// }
 
-	output := []string{}
-	protoMessage := schemas[typeName]
+	// output := []string{}
+	// protoMessage := schemas[typeName]
 
-	// return an empty string if there is no properties for the typeName
-	if len(protoMessage.Value.Properties) == 0 {
-		return ""
-	}
+	// // return an empty string if there is no properties for the typeName
+	// if len(protoMessage.Value.Properties) == 0 {
+	// 	return ""
+	// }
 
-	for p, meta := range protoMessage.Value.Properties {
-		comments := ""
-		o := ""
+	// for p, meta := range protoMessage.Value.Properties {
+	// 	comments := ""
+	// 	o := ""
 
-		if meta.Value.Description != "" {
-			for _, commentLine := range strings.Split(meta.Value.Description, "\n") {
-				comments += "/// " + strings.TrimSpace(commentLine) + "\n"
-			}
-		}
-		switch meta.Value.Type {
-		case "string":
-			payload := map[string]interface{}{
-				"type":      stringType,
-				"parameter": p,
-			}
-			o = runTemplate("normal", normalType, payload)
-		case "boolean":
-			payload := map[string]interface{}{
-				"type":      boolType,
-				"parameter": p,
-			}
-			o = runTemplate("normal", normalType, payload)
-		case "number":
-			switch meta.Value.Format {
-			case "int32":
-				payload := map[string]interface{}{
-					"type":      int64Type,
-					"parameter": p,
-				}
-				o = runTemplate("normal", normalType, payload)
-			case "int64":
-				payload := map[string]interface{}{
-					"type":      int64Type,
-					"parameter": p,
-				}
-				o = runTemplate("jsonInt64", jsonInt64, payload)
-			case "float", "double":
-				payload := map[string]interface{}{
-					"type":      doubleType,
-					"parameter": p,
-				}
-				o = runTemplate("normal", normalType, payload)
-			}
-		case "array":
-			types := detectType2(serviceName, typeName, p)
-			payload := map[string]interface{}{
-				"type":      typesMapper(types[0]),
-				"parameter": p,
-			}
-			o = runTemplate("array", arrayType, payload)
-		case "object":
-			types := detectType2(serviceName, typeName, p)
-			if len(types) == 1 {
-				// a Message Type
-				payload := map[string]interface{}{
-					"type":      typesMapper(types[0]),
-					"parameter": p,
-				}
-				o = runTemplate("normal", normalType, payload)
-			} else {
-				// a Map object
-				payload := map[string]interface{}{
-					"type1":     typesMapper(types[0]),
-					"type2":     typesMapper(types[1]),
-					"parameter": p,
-				}
-				o = runTemplate("map", mapType, payload)
-			}
-		default:
-			payload := map[string]interface{}{
-				"parameter": p,
-			}
-			o = runTemplate("any", anyType, payload)
-		}
+	// 	if meta.Value.Description != "" {
+	// 		for _, commentLine := range strings.Split(meta.Value.Description, "\n") {
+	// 			comments += "/// " + strings.TrimSpace(commentLine) + "\n"
+	// 		}
+	// 	}
+	// 	switch meta.Value.Type {
+	// 	case "string":
+	// 		payload := map[string]interface{}{
+	// 			"type":      stringType,
+	// 			"parameter": p,
+	// 		}
+	// 		o = runTemplate("normal", normalType, payload)
+	// 	case "boolean":
+	// 		payload := map[string]interface{}{
+	// 			"type":      boolType,
+	// 			"parameter": p,
+	// 		}
+	// 		o = runTemplate("normal", normalType, payload)
+	// 	case "number":
+	// 		switch meta.Value.Format {
+	// 		case "int32":
+	// 			payload := map[string]interface{}{
+	// 				"type":      int64Type,
+	// 				"parameter": p,
+	// 			}
+	// 			o = runTemplate("normal", normalType, payload)
+	// 		case "int64":
+	// 			payload := map[string]interface{}{
+	// 				"type":      int64Type,
+	// 				"parameter": p,
+	// 			}
+	// 			o = runTemplate("jsonInt64", jsonInt64, payload)
+	// 		case "float", "double":
+	// 			payload := map[string]interface{}{
+	// 				"type":      doubleType,
+	// 				"parameter": p,
+	// 			}
+	// 			o = runTemplate("normal", normalType, payload)
+	// 		}
+	// 	case "array":
+	// 		types := detectType2(serviceName, typeName, p)
+	// 		payload := map[string]interface{}{
+	// 			"type":      typesMapper(types[0]),
+	// 			"parameter": p,
+	// 		}
+	// 		o = runTemplate("array", arrayType, payload)
+	// 	case "object":
+	// 		types := detectType2(serviceName, typeName, p)
+	// 		if len(types) == 1 {
+	// 			// a Message Type
+	// 			payload := map[string]interface{}{
+	// 				"type":      typesMapper(types[0]),
+	// 				"parameter": p,
+	// 			}
+	// 			o = runTemplate("normal", normalType, payload)
+	// 		} else {
+	// 			// a Map object
+	// 			payload := map[string]interface{}{
+	// 				"type1":     typesMapper(types[0]),
+	// 				"type2":     typesMapper(types[1]),
+	// 				"parameter": p,
+	// 			}
+	// 			o = runTemplate("map", mapType, payload)
+	// 		}
+	// 	default:
+	// 		payload := map[string]interface{}{
+	// 			"parameter": p,
+	// 		}
+	// 		o = runTemplate("any", anyType, payload)
+	// 	}
 
-		output = append(output, comments+o)
-	}
+	// 	output = append(output, comments+o)
+	// }
 
-	res := "{" + strings.Join(output, ", ") + ",}"
-	return res
+	// res := "{" + strings.Join(output, ", ") + ",}"
+	// return res
+	return ""
 }
 
 func (k *kotlinG) IndexFile(dartPath string, services []service) {
