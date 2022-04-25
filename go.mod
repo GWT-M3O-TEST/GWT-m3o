@@ -1,4 +1,4 @@
-module github.com/m3o/m3o
+module github.com/GWT-M3O-TEST/m3o
 
 go 1.15
 
