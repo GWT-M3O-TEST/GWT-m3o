@@ -56,15 +56,6 @@ func main() {
 		}
 		tsG := &tsG{}
 		generate(tsG, tsPath, workDir, examplesPath)
-	case "kotlin":
-		kotlinPath := filepath.Join(workDir, "clients", "kotlin")
-		err = os.MkdirAll(kotlinPath, FOLDER_EXECUTE_PERMISSION)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		kotlinG := &kotlinG{}
-		generate(kotlinG, kotlinPath, workDir, examplesPath)
 	case "shell":
 		shellG := &shellG{}
 		generate(shellG, "", workDir, examplesPath)
@@ -86,7 +77,6 @@ func generate(g generator, path, workDir, examplesPath string) {
 	}
 
 	services := []service{}
-	tsFileList := []string{"esm", "index.js", "index.d.ts"}
 
 	for _, f := range files {
 
@@ -113,7 +103,7 @@ func generate(g generator, path, workDir, examplesPath string) {
 			if skip {
 				continue
 			}
-			tsFileList = append(tsFileList, f.Name())
+
 			service := service{
 				Name:       serviceName,
 				ImportName: serviceName,
@@ -157,5 +147,4 @@ func generate(g generator, path, workDir, examplesPath string) {
 
 	g.IndexFile(path, services)
 
-	// publishToNpm(tsPath, tsFileList)
 }
