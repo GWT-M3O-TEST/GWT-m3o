@@ -162,14 +162,6 @@ func (n *tsG) ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title st
 		fmt.Println("Failed to append to schema file", err)
 		os.Exit(1)
 	}
-
-	cmd := exec.Command("prettier", "-w", title+".js")
-	cmd.Dir = filepath.Join(examplesPath, "js", serviceName, endpoint)
-	outp, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Printf("Problem with '%v' example '%v': %v\n", serviceName, endpoint, string(outp))
-		os.Exit(1)
-	}
 }
 
 func (n *tsG) IndexFile(tsPath string, services []service) {
