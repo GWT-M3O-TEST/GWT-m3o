@@ -13,42 +13,92 @@ env:
   GH_PAT: ${{ secrets.API_TOKEN_GITHUB }}
 
 jobs:
-  # all m3o clients at once, it is triggered on push or repository_dispatch == build_m3o_client
-  generate:
+  # generate_basic: generates the basic clients Go and Ts, it is triggered on push or repository_dispatch == build_m3o_client
+  generate-basic:
+    name: Generate Basic Clients
     if: ${{ github.event_name == 'push' || github.event.action == 'build_m3o_client' }}
     runs-on: ubuntu-latest
     steps:
-      - name: trigger running/updating M3O Services
-        run: |
-          # https://github.com/m3o/m3o/pull/187#issuecomment-1057972264
-          # https://github.com/m3o/m3o/pull/187#issuecomment-1057972795
+      # - name: trigger running/updating M3O Services
+      #   run: |
+      #     # https://github.com/m3o/m3o/pull/187#issuecomment-1057972264
+      #     # https://github.com/m3o/m3o/pull/187#issuecomment-1057972795
         # env:
         #   MICRO_ADMIN: ${{ secrets.MICRO_ADMIN_TOKEN }}
 
+      
+        
+      - name: Trigger m3o/m3o-go
+        run: |
+          curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-go/dispatches -d '{"event_type":"build_publish_go"}'
+        
+      - name: Trigger m3o/m3o-ts
+        run: |
+          curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-js/dispatches -d '{"event_type":"build_publish_ts"}'
+
+      - name: Wait for m3o-go clients generation to succeed
+        uses: lewagon/wait-on-check-action@v1.0.0
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'build Go clients and examples'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+
+      - name: Wait for m3o-js clients generation to succeed
+        uses: lewagon/wait-on-check-action@v1.0.0
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'build TS clients and examples'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+
+  generate-openapi:
+    name: generate openapi spec and publish the api
+    runs-on: ubuntu-latest
+    needs: generate-basic
+    steps:
+      - name: Check micro/services repo
+        uses: actions/checkout@v2
+        with:
+          repository: 'micro/services'
+          path: services
+
+      - name: install postman converter
+        working-directory: services
+        run: |
+          # sudo npm install -g openapi-to-postmanv2
+          # openapi2postmanv2 -h
+          echo 'install postman converter'
+
+      - name: generate openapi spec and publish the api
+        working-directory: services
+        run: |
+          # go run cmd/api-publisher/main.go .
+          echo 'generate openapi spec and publish the api'
+        env:
+          MICRO_ADMIN_TOKEN: ${{ secrets.MICRO_ADMIN_TOKEN }}
+
+  generate-rest:
+    name: generate the rest of M3O clients
+    runs-on: ubuntu-latest
+    needs: generate-openapi
+    steps:
       - name: Trigger m3o/m3o-dart
         run: |
           curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-dart/dispatches -d '{"event_type":"build_publish_dart"}'
-        
-      # - name: Trigger m3o/m3o-go
-      #   run: |
-      #     curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-go/dispatches -d '{"event_type":"build_publish_go"}'
-        
-      # - name: Trigger m3o/m3o-ts
-      #   run: |
-      #     curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-js/dispatches -d '{"event_type":"build_publish_ts"}'
-        
-      # - name: Trigger m3o/m3o-sh
-      #   run: |
-      #     curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-sh/dispatches -d '{"event_type":"build_publish_shell"}'
 
-      # - name: Trigger m3o/m3o-cli
-      #   run: |
-      #     curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-cli/dispatches -d '{"event_type":"build_publish_cli"}'
+      - name: Trigger m3o/m3o-sh
+        run: |
+          curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-sh/dispatches -d '{"event_type":"build_publish_shell"}'
 
-      # - name: Trigger m3o/m3o-kotlin
-      #   run: |
-      #     curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-kotlin/dispatches -d '{"event_type":"build_publish_kotlin"}'
+      - name: Trigger m3o/m3o-cli
+        run: |
+          curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-cli/dispatches -d '{"event_type":"build_publish_cli"}'
 
+      - name: Trigger m3o/m3o-kotlin
+        run: |
+          curl -X POST -H "Authorization: token $GH_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/GWT-M3O-TEST/m3o-kotlin/dispatches -d '{"event_type":"build_publish_kotlin"}'
+       
   # build m3o dart clients, it is triggered on repository_dispatch == build_dart
   generate-dart:
     if: ${{ github.event.action == 'build_dart' }}
