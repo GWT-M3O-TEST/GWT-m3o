@@ -19,7 +19,7 @@ import (
 
 type tsG struct {
 	generator
-	// add appropriate fields.
+	// add appropriate fields..
 }
 
 func (n *tsG) ServiceClient(serviceName, tsPath string, service service) {
