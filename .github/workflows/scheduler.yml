@@ -40,7 +40,7 @@ jobs:
         uses: lewagon/wait-on-check-action@v1.0.0
         with:
           ref: ${{ github.ref }}
-          check-name: 'build Go clients and examples'
+          check-name: 'Build Go Clients and Examples'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 10
 
@@ -48,7 +48,7 @@ jobs:
         uses: lewagon/wait-on-check-action@v1.0.0
         with:
           ref: ${{ github.ref }}
-          check-name: 'build TS clients and examples'
+          check-name: 'Build TS Clients and Examples'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 10
 

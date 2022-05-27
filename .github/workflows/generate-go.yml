@@ -41,7 +41,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source_file: 'm3o-go/'
-          destination_repo: 'm3o/m3o-go'
+          destination_repo: 'GWT-M3O-TEST/m3o-go'
           destination_branch: 'main'
           github_server: 'github.com'
           user_name: 'm3o-actions'
