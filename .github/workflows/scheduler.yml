@@ -83,7 +83,7 @@ jobs:
           cat package.json
 
       - name: Push Go files
-        uses: dmnemec/copy_file_to_another_repo_action@main
+        uses: m3o/commit-action@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
@@ -97,7 +97,7 @@ jobs:
           commit_message: 'Commit from generate-go'
       
       - name: Push JS files
-        uses: dmnemec/copy_file_to_another_repo_action@main
+        uses: m3o/commit-action@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
