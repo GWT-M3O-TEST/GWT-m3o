@@ -42,7 +42,7 @@ jobs:
           ref: main
           check-name: 'generate-go'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
+          wait-interval: 20
 
       - name: Wait for m3o-js clients generation to succeed
         uses: lewagon/wait-on-check-action@v1.0.0
@@ -50,7 +50,7 @@ jobs:
           ref: main
           check-name: 'generate-ts'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
+          wait-interval: 20
 
   generate-openapi:
     name: generate openapi spec and publish the api

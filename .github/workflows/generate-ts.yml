@@ -50,11 +50,11 @@ jobs:
           cat package.json
 
       - name: Push JS files
-        uses: m3o/commit-action@main
+        uses: dmnemec/copy_file_to_another_repo_action@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source_file: 'services/clients/ts/'
+          source_file: 'm3o-js/'
           destination_repo: 'GWT-M3O-TEST/m3o-js'
           destination_branch: 'main'
           github_server: 'github.com'

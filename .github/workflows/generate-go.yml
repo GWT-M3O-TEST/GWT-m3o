@@ -36,7 +36,7 @@ jobs:
           rsync -avz examples/go/ ../m3o-go/examples/
 
       - name: Push Go files
-        uses: m3o/commit-action@main
+        uses: dmnemec/copy_file_to_another_repo_action@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
