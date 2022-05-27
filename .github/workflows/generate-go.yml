@@ -4,7 +4,7 @@ on:
     types: [build_publish_go]
 
 jobs:
-  generate:
+  generate-go:
     name: build Go clients and examples
     runs-on: ubuntu-latest
     steps:
@@ -44,6 +44,6 @@ jobs:
           destination_repo: 'GWT-M3O-TEST/m3o-go'
           destination_branch: 'main'
           github_server: 'github.com'
-          user_name: 'm3o-actions'
+          user_name: 'lambdaR'
           use_rsync: true
           commit_message: 'Commit from generate-go'
