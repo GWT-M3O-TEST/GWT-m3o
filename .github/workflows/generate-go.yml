@@ -1,0 +1,49 @@
+name: Build Go Clients and Examples
+on:
+  repository_dispatch:
+    types: [build_publish_go]
+
+jobs:
+  generate:
+    name: build Go clients and examples
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check m3o-go repo
+        uses: actions/checkout@v3
+        with:
+          repository: m3o/m3o-go
+          path: m3o-go
+
+      - name: Check micro/services repo
+        uses: actions/checkout@v3
+        with:
+          repository: 'micro/services'
+          path: services
+
+      - name: Generate m3o-go clients
+        uses: m3o/m3o-generator-action@main
+        with:
+          target: 'go'
+          services_path: services
+
+      - name: Adjust generated things before pushing
+        working-directory: services
+        
+        run: |
+          # sync the clients to m3o-go/
+          rsync -avz clients/go/ ../m3o-go/
+          # sync the examples to m3o-go/examples
+          rsync -avz examples/go/ ../m3o-go/examples/
+
+      - name: Push Go files
+        uses: m3o/commit-action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_file: 'm3o-go/'
+          destination_repo: 'm3o/m3o-go'
+          destination_branch: 'main'
+          github_server: 'github.com'
+          user_name: 'm3o-actions'
+          use_rsync: true
+          commit_message: 'Commit from generate-go'
