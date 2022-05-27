@@ -83,37 +83,43 @@ jobs:
           cat package.json
 
       - name: Push Go files
-        uses: m3o/commit-action@main
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          source_file: 'm3o-go/'
-          destination_repo: 'GWT-M3O-TEST/m3o-go'
-          destination_branch: 'main'
-          git_server: 'github.com'
-          user_email: 'danieljoudat@email.com'
-          user_name: 'lambdaR'
-          use_rsync: true
-          commit_message: 'Commit from generate-go'
+        run: |
+          echo 'Testing Push Go files...'
+        # uses: m3o/commit-action@main
+        # env:
+        #   API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        # with:
+        #   source_file: 'm3o-go/'
+        #   destination_repo: 'GWT-M3O-TEST/m3o-go'
+        #   destination_branch: 'main'
+        #   git_server: 'github.com'
+        #   user_email: 'danieljoudat@email.com'
+        #   user_name: 'lambdaR'
+        #   use_rsync: true
+        #   commit_message: 'Commit from generate-go'
       
       - name: Push JS files
-        uses: m3o/commit-action@main
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          source_file: 'm3o-js/'
-          destination_repo: 'GWT-M3O-TEST/m3o-js'
-          destination_branch: 'main'
-          git_server: 'github.com'
-          user_email: 'danieljoudat@email.com'
-          user_name: 'lambdaR'
-          use_rsync: true
-          commit_message: 'Commit from generate-ts'
+        run: |
+          echo 'Testing Push JS files...'
+        # uses: m3o/commit-action@main
+        # env:
+        #   API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        # with:
+        #   source_file: 'm3o-js/'
+        #   destination_repo: 'GWT-M3O-TEST/m3o-js'
+        #   destination_branch: 'main'
+        #   git_server: 'github.com'
+        #   user_email: 'danieljoudat@email.com'
+        #   user_name: 'lambdaR'
+        #   use_rsync: true
+        #   commit_message: 'Commit from generate-ts'
 
       - name: Publish m3o-js clients
-        uses: m3o/m3o-publish-ts-action@main
-        env:
-          NPM_TOKEN: 'some random token'
+        run: |
+          echo 'Testing Publish m3o-js clients...'
+        # uses: m3o/m3o-publish-ts-action@main
+        # env:
+        #   NPM_TOKEN: 'some random token'
         
   generate-openapi:
     name: generate openapi spec and publish the api
