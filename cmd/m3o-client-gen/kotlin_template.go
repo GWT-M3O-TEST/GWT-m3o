@@ -102,16 +102,16 @@ object {{ title $service.Name }}Service {
 {{- $reqType := requestType $key }}
 {{- $endpointName := requestTypeToEndpointName $key}}
 {{- if isNotStream $service.Spec $service.Name $reqType }}
-    suspend fun {{ untitle $endpointName }}(name: String): {{ title $service.Name}}{{ $endpointName }}Response {
+    suspend fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request): {{ title $service.Name}}{{ $endpointName }}Response {
         return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) {
-          body = {{ title $service.Name}}{{ $endpointName }}Request(name)
+          body = req
         }
     }
 {{- end }}
 {{- if isStream $service.Spec $service.Name $reqType }}
-    fun {{ untitle $endpointName }}(name: String, messages: Int = 1, action: (Exception?, {{ title $service.Name}}{{ $endpointName }}Response?) -> Unit) {
+    fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request, action: (Exception?, {{ title $service.Name}}{{ $endpointName }}Response?) -> Unit) {
         val url = getUrl(SERVICE, "{{ $endpointName }}", true)
-        WebSocket(url, Json.encodeToString({{ title $service.Name}}{{ $endpointName }}Request(name, messages))) { e, response ->
+        WebSocket(url, Json.encodeToString(req)) { e, response ->
             action(e, if (response != null) Json.decodeFromString(response) else null)
         }.connect()
     }
