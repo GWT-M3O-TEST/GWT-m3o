@@ -125,40 +125,48 @@ data class {{ title $service.Name}}{{ $typeName }}({{ recursiveTypeDefinitionKot
 {{- end }}
 `
 
-const kotlinExampleTemplate = `{{ $service := .service }}import 'dart:io';
+const kotlinExampleTemplate = `
+{{- $service := .service }}
+package examples.{{ $service.Name }}.{{ .endpoint }}
 
-import 'package:m3o/src/{{ $service.Name }}/{{ $service.Name }}.dart';
+import com.m3o.m3okotlin.M3O
+import com.m3o.m3okotlin.services.{{ $service.Name }}
 
-void main() async {
-  final ser = {{title $service.Name}}Service(Platform.environment['M3O_API_TOKEN']!);
- 
-  final payload = <String, dynamic>{{ dartExampleRequest .example.Request }};
+{{- $reqType := requestType .endpoint }}
+{{- if isNotStream $service.Spec $service.Name $reqType }}
+suspend fun main() {
+  M3O.initialize(System.getenv("M3O_API_TOKEN"))
 
-  {{ title .endpoint }}Request req = {{ title .endpoint }}Request.fromJson(payload);
-
+  val req = {{ title $service.Name }}{{ .endpoint }}Request(name = "Jone")
   
   try {
-	  {{ $reqType := requestType .endpoint }}
-	  {{ if isNotStream $service.Spec $service.Name $reqType }}
-	  {{ title .endpoint }}Response res = await ser.{{ .endpoint }}(req);
-
-    res.map((value) => print(value),
-        Merr: ({{ title .endpoint }}ResponseMerr err) => print(err.body!['body']));
-
-	  {{ end }}	
-	  {{ if isStream $service.Spec $service.Name $reqType }}
-	  final res = await ser.{{ .endpoint }}(req);
-		await for (var sr in res) {
-		sr.map((value) => print(value),
-			Merr: ({{ title .endpoint }}ResponseMerr err) => print(err.body));
-		}	
-	  {{ end }}
-  } catch (e) {
-    print(e);
-  } finally {
-    exit(0);
+      val response = {{ title $service.Name }}Service.{{ untitle .endpoint }}(req)
+      println(response)
+  } catch (e: Exception) {
+      println(e)
   }
-}`
+}
+{{- end }}
+{{- if isStream $service.Spec $service.Name $reqType }}
+fun main() {
+  M3O.initialize(System.getenv("M3O_API_TOKEN"))
+
+  val req = val req = {{ title $service.Name }}{{ .endpoint }}Request(messages = 2, name = "John")
+  
+  try {
+      val socket = {{ title $service.Name }}Service.{{ untitle .endpoint }}(req) { socketError, response ->
+          if (socketError == null) {
+              println(response)
+          } else {
+              println(socketError)
+          }
+      }
+  } catch (e: Exception) {
+      println(e)
+  }
+}
+{{- end }}
+`
 
 const kotlinReadmeTopTemplate = `{{ $service := .service }}# {{ title $service.Name }}
 

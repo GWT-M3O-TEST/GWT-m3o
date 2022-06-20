@@ -4,12 +4,14 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/stoewer/go-strcase"
 )
 
 type kotlinG struct {
@@ -234,115 +236,115 @@ func (k *kotlinG) IndexFile(dartPath string, services []service) {
 }
 
 func (k *kotlinG) TopReadme(serviceName, examplesPath string, service service) {
-	// templ, err := template.New("dartTopReadme" + serviceName).Funcs(funcMap()).Parse(dartReadmeTopTemplate)
-	// if err != nil {
-	// 	fmt.Println("Failed to unmarshal", err)
-	// 	os.Exit(1)
-	// }
-	// b := bytes.Buffer{}
-	// buf := bufio.NewWriter(&b)
-	// err = templ.Execute(buf, map[string]interface{}{
-	// 	"service": service,
-	// })
-	// if err != nil {
-	// 	fmt.Println("Failed to unmarshal", err)
-	// 	os.Exit(1)
-	// }
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	os.Exit(1)
-	// }
-	// os.MkdirAll(filepath.Join(examplesPath, "dart", serviceName), FOLDER_EXECUTE_PERMISSION)
-	// f, err := os.OpenFile(filepath.Join(examplesPath, "dart", serviceName, "README.md"), os.O_TRUNC|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
-	// if err != nil {
-	// 	fmt.Println("Failed to open schema file", err)
-	// 	os.Exit(1)
-	// }
-	// buf.Flush()
-	// _, err = f.Write(b.Bytes())
-	// if err != nil {
-	// 	fmt.Println("Failed to append to schema file", err)
-	// 	os.Exit(1)
-	// }
+	templ, err := template.New("kotlinTopReadme" + serviceName).Funcs(funcMap()).Parse(kotlinReadmeTopTemplate)
+	if err != nil {
+		fmt.Println("Failed to unmarshal", err)
+		os.Exit(1)
+	}
+	b := bytes.Buffer{}
+	buf := bufio.NewWriter(&b)
+	err = templ.Execute(buf, map[string]interface{}{
+		"service": service,
+	})
+	if err != nil {
+		fmt.Println("Failed to unmarshal", err)
+		os.Exit(1)
+	}
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	os.MkdirAll(filepath.Join(examplesPath, "kotlin", serviceName), FOLDER_EXECUTE_PERMISSION)
+	f, err := os.OpenFile(filepath.Join(examplesPath, "kotlin", serviceName, "README.md"), os.O_TRUNC|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
+	if err != nil {
+		fmt.Println("Failed to open schema file", err)
+		os.Exit(1)
+	}
+	buf.Flush()
+	_, err = f.Write(b.Bytes())
+	if err != nil {
+		fmt.Println("Failed to append to schema file", err)
+		os.Exit(1)
+	}
 }
 
 func (k *kotlinG) ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, title string, service service, example example) {
-	// templ, err := template.New("dart" + serviceName + endpoint).Funcs(funcMap()).Parse(dartExampleTemplate)
-	// if err != nil {
-	// 	fmt.Println("Failed to unmarshal", err)
-	// 	os.Exit(1)
-	// }
-	// b := bytes.Buffer{}
-	// buf := bufio.NewWriter(&b)
-	// err = templ.Execute(buf, map[string]interface{}{
-	// 	"service":  service,
-	// 	"example":  example,
-	// 	"endpoint": endpoint,
-	// 	"funcName": strcase.UpperCamelCase(title),
-	// })
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	os.Exit(1)
-	// }
+	templ, err := template.New("kotlin" + serviceName + endpoint).Funcs(funcMap()).Parse(kotlinExampleTemplate)
+	if err != nil {
+		fmt.Println("Failed to unmarshal", err)
+		os.Exit(1)
+	}
+	b := bytes.Buffer{}
+	buf := bufio.NewWriter(&b)
+	err = templ.Execute(buf, map[string]interface{}{
+		"service":  service,
+		"example":  example,
+		"endpoint": endpoint,
+		"funcName": strcase.UpperCamelCase(title),
+	})
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-	// // create dart examples directory
-	// err = os.MkdirAll(filepath.Join(examplesPath, "dart", serviceName, endpoint, title), FOLDER_EXECUTE_PERMISSION)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	os.Exit(1)
-	// }
-	// exampleFile := filepath.Join(examplesPath, "dart", serviceName, endpoint, title, "main.dart")
-	// f, err := os.OpenFile(exampleFile, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
-	// if err != nil {
-	// 	fmt.Println("Failed to open schema file", err)
-	// 	os.Exit(1)
-	// }
+	// create dart examples directory
+	err = os.MkdirAll(filepath.Join(examplesPath, "kotlin", serviceName, endpoint, title), FOLDER_EXECUTE_PERMISSION)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	exampleFile := filepath.Join(examplesPath, "kotlin", serviceName, endpoint, title, "main.kt")
+	f, err := os.OpenFile(exampleFile, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
+	if err != nil {
+		fmt.Println("Failed to open schema file", err)
+		os.Exit(1)
+	}
 
-	// buf.Flush()
-	// _, err = f.Write(b.Bytes())
-	// if err != nil {
-	// 	fmt.Println("Failed to append to schema file", err)
-	// 	os.Exit(1)
-	// }
+	buf.Flush()
+	_, err = f.Write(b.Bytes())
+	if err != nil {
+		fmt.Println("Failed to append to schema file", err)
+		os.Exit(1)
+	}
 
-	// if example.RunCheck && example.Idempotent {
-	// 	err = ioutil.WriteFile(filepath.Join(examplesPath, "dart", serviceName, endpoint, title, ".run"), []byte{}, FILE_EXECUTE_PERMISSION)
-	// 	if err != nil {
-	// 		fmt.Println("Failed to write run file", err)
-	// 		os.Exit(1)
-	// 	}
-	// }
+	if example.RunCheck && example.Idempotent {
+		err = ioutil.WriteFile(filepath.Join(examplesPath, "kotlin", serviceName, endpoint, title, ".run"), []byte{}, FILE_EXECUTE_PERMISSION)
+		if err != nil {
+			fmt.Println("Failed to write run file", err)
+			os.Exit(1)
+		}
+	}
 
-	// // per endpoint dart readme examples
-	// templ, err = template.New("dartReadmebottom" + serviceName + endpoint).Funcs(funcMap()).Parse(dartReadmeBottomTemplate)
-	// if err != nil {
-	// 	fmt.Println("Failed to unmarshal", err)
-	// 	os.Exit(1)
-	// }
-	// b = bytes.Buffer{}
-	// buf = bufio.NewWriter(&b)
-	// err = templ.Execute(buf, map[string]interface{}{
-	// 	"service":  service,
-	// 	"example":  example,
-	// 	"endpoint": endpoint,
-	// 	"funcName": strcase.UpperCamelCase(title),
-	// })
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	os.Exit(1)
-	// }
+	// per endpoint dart readme examples
+	templ, err = template.New("kotlinReadmebottom" + serviceName + endpoint).Funcs(funcMap()).Parse(kotlinReadmeBottomTemplate)
+	if err != nil {
+		fmt.Println("Failed to unmarshal", err)
+		os.Exit(1)
+	}
+	b = bytes.Buffer{}
+	buf = bufio.NewWriter(&b)
+	err = templ.Execute(buf, map[string]interface{}{
+		"service":  service,
+		"example":  example,
+		"endpoint": endpoint,
+		"funcName": strcase.UpperCamelCase(title),
+	})
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-	// readmeAppend := filepath.Join(examplesPath, "dart", serviceName, "README.md")
-	// f, err = os.OpenFile(readmeAppend, os.O_APPEND|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
-	// if err != nil {
-	// 	fmt.Println("Failed to open schema file", err)
-	// 	os.Exit(1)
-	// }
+	readmeAppend := filepath.Join(examplesPath, "kotlin", serviceName, "README.md")
+	f, err = os.OpenFile(readmeAppend, os.O_APPEND|os.O_WRONLY|os.O_CREATE, FILE_EXECUTE_PERMISSION)
+	if err != nil {
+		fmt.Println("Failed to open schema file", err)
+		os.Exit(1)
+	}
 
-	// buf.Flush()
-	// _, err = f.Write(b.Bytes())
-	// if err != nil {
-	// 	fmt.Println("Failed to append to schema file", err)
-	// 	os.Exit(1)
-	// }
+	buf.Flush()
+	_, err = f.Write(b.Bytes())
+	if err != nil {
+		fmt.Println("Failed to append to schema file", err)
+		os.Exit(1)
+	}
 }
