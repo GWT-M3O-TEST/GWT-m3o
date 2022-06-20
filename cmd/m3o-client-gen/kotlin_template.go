@@ -1,84 +1,5 @@
 package main
 
-// const dartIndexTemplate = `library m3o;
-
-// export 'src/client.dart';
-// {{ range $service := .services }}export 'src/{{ $service.Name }}/{{ $service.Name}}.dart';
-// {{ end }}
-// `
-
-// class {{title $service.Name}}Service {
-// 	var _client;
-//   	final String token;
-
-// 	{{title $service.Name}}Service(String token) :token = token {
-// 	  _client = Client(token: token);
-// 	}
-// {{ range $key, $req := $service.Spec.Components.RequestBodies }}{{ $reqType := requestType $key }}{{ $endpointName := requestTypeToEndpointName $key}}
-// 	/{{ if endpointComment $endpointName $service.Spec.Components.Schemas }}{{ endpointComment $endpointName $service.Spec.Components.Schemas }}{{ end -}}
-// 	{{ if isNotStream $service.Spec $service.Name $reqType }}Future<{{ $endpointName }}Response> {{untitle $endpointName}}({{ $endpointName }}Request req) async {
-// 		Request request = Request(
-// 			service: '{{$service.Name}}',
-// 			endpoint: '{{$endpointName}}',
-// 			body: req.toJson(),
-// 		);
-
-// 		try {
-// 			Response res = await _client.call(request);
-// 			if (isError(res.body)) {
-// 			  final err = Merr(res.toJson());
-// 			  return {{ $endpointName }}Response.Merr(body: err.b);
-// 			}
-// 			return {{ $endpointName }}ResponseData.fromJson(res.body);
-// 		  } catch (e) {
-// 			throw Exception(e);
-// 		  }
-// 	}{{end}}
-// 	{{ if isStream $service.Spec $service.Name $reqType }}Stream<{{ $endpointName }}Response> {{untitle $endpointName}}({{ $endpointName }}Request req) async* {
-// 		Request request = Request(
-// 			service: '{{$service.Name}}',
-// 			endpoint: '{{$endpointName}}',
-// 			body: req.toJson(),
-// 		);
-
-// 		try {
-// 			var webS = await _client.stream(request);
-// 			await for (var value in webS!) {
-// 				final vo = jsonDecode(value);
-// 				if (isError(vo)) {
-// 					yield {{ $endpointName }}Response.Merr(body: vo);
-// 				} else {
-// 					yield {{ $endpointName }}ResponseData.fromJson(vo);
-// 				}
-// 			}
-// 		} catch (e) {
-// 			throw Exception(e);
-// 		}
-// 	}{{end}}{{end}}
-// }
-
-// {{ range $typeName, $schema := $service.Spec.Components.Schemas }}
-// {{ $isResponse := isResponse $typeName }}
-// {{ if not $isResponse }}
-// @Freezed()
-// class {{ title $typeName }} with _${{ title $typeName }} {
-// 	const factory {{ title $typeName }}({{ recursiveTypeDefinitionDart $service.Name $typeName $service.Spec.Components.Schemas }}) = _{{ title $typeName }};
-// 	factory {{ title $typeName }}.fromJson(Map<String, dynamic> json) =>
-//       _${{ title $typeName }}FromJson(json);
-// }
-// {{ end }}
-// {{ if $isResponse }}
-// @Freezed()
-// class {{ title $typeName }} with _${{ title $typeName }} {
-// 	const factory {{ title $typeName }}({{ recursiveTypeDefinitionDart $service.Name $typeName $service.Spec.Components.Schemas }}) = {{ title $typeName }}Data;
-// 	const factory {{ title $typeName }}.Merr({Map<String, dynamic>? body}) =
-// 	{{ title $typeName }}Merr;
-// 	factory {{ title $typeName }}.fromJson(Map<String, dynamic> json) =>
-//       _${{ title $typeName }}FromJson(json);
-// }
-// {{ end }}
-// {{ end }}
-
 const kotlinServiceTemplate = `
 {{- $service := .service }}
 package com.m3o.m3okotlin.services.{{ $service.Name }}
@@ -102,11 +23,19 @@ object {{ title $service.Name }}Service {
 {{- $reqType := requestType $key }}
 {{- $endpointName := requestTypeToEndpointName $key}}
 {{- if isNotStream $service.Spec $service.Name $reqType }}
+{{- $isEmptyRequest := isEmptyRequest $endpointName $service.Spec.Components.Schemas}}
+{{- if not $isEmptyRequest }}
     suspend fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request): {{ title $service.Name}}{{ $endpointName }}Response {
         return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) {
           body = req
         }
     }
+    {{- end }}
+    {{- if $isEmptyRequest }}
+    suspend fun {{ untitle $endpointName }}(): {{ title $service.Name}}{{ $endpointName }}Response {
+        return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) 
+    }
+{{- end }}
 {{- end }}
 {{- if isStream $service.Spec $service.Name $reqType }}
     fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request, action: (Exception?, {{ title $service.Name}}{{ $endpointName }}Response?) -> Unit) {

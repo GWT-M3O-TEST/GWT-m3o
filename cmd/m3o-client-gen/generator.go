@@ -107,6 +107,17 @@ func funcMap() map[string]interface{} {
 			// this is primarily used in dart template.
 			return strings.HasSuffix(typeName, "Response")
 		},
+		// isEmptyRequest checks if the <ServiceName><Endpoint>Request is empty or has
+		// no attributes
+		"isEmptyRequest": func(endpoint string, schemas map[string]*openapi3.SchemaRef) bool {
+			protoMessage, ok := schemas[endpoint]
+			if !ok {
+				fmt.Printf("isEmptyRequest - the provided schemas doesn't contain %v\n", endpoint)
+				os.Exit(1)
+			}
+
+			return len(protoMessage.Value.Properties) == 0
+		},
 		// Similar to isStream, this function checks if a service has
 		// a stream endpoint or not
 		"serviceHasStream": func(spec *openapi3.Swagger, service string) bool {
@@ -162,6 +173,9 @@ func funcMap() map[string]interface{} {
 		},
 		"goExampleRequest": func(serviceName, endpoint string, schemas map[string]*openapi3.SchemaRef, exampleJSON map[string]interface{}) string {
 			return schemaToGoExample(serviceName, strings.Title(endpoint)+"Request", schemas, exampleJSON)
+		},
+		"kotlinExampleRequest": func(serviceName, endpoint string, schemas map[string]*openapi3.SchemaRef, exampleJSON map[string]interface{}) string {
+			return schemaToKotlinExample(serviceName, strings.Title(endpoint)+"Request", schemas, exampleJSON)
 		},
 		"tsExampleRequest": func(serviceName, endpoint string, schemas map[string]*openapi3.SchemaRef, exampleJSON map[string]interface{}) string {
 			bs, _ := json.MarshalIndent(exampleJSON, "", "  ")

@@ -339,3 +339,164 @@ func (k *kotlinG) ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, titl
 		os.Exit(1)
 	}
 }
+
+func schemaToKotlinExample(serviceName, endpoint string, schemas map[string]*openapi3.SchemaRef, exa map[string]interface{}) string {
+	var requestAttr = `{{ .parameter }}: {{ .value }}`
+	var primitiveArrRequestAttr = `{{ .parameter }}: []{{ .type }}`
+	var arrRequestAttr = `{{ .parameter }}: []{{ .service }}.{{ .message }}`
+	var objRequestAttr = `{{ .parameter }}: &{{ .service }}.{{ .message }}`
+	var jsonType = "map[string]interface{}"
+	var stringType = "string"
+	var int32Type = "int32"
+	var int64Type = "int64"
+	var floatType = "float32"
+	var doubleType = "float64"
+	var boolType = "bool"
+
+	runTemplate := func(tmpName, temp string, payload map[string]interface{}) string {
+		t, err := template.New(tmpName).Parse(temp)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to parse %s - err: %v\n", temp, err)
+			return ""
+		}
+		var tb bytes.Buffer
+		err = t.Execute(&tb, payload)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "faild to apply parsed template %s to payload %v - err: %v\n", temp, payload, err)
+			return ""
+		}
+
+		return tb.String()
+	}
+
+	typesMapper := func(t string) string {
+		switch t {
+		case "STRING":
+			return stringType
+		case "INT32":
+			return int32Type
+		case "INT64":
+			return int64Type
+		case "FLOAT":
+			return floatType
+		case "DOUBLE":
+			return doubleType
+		case "BOOL":
+			return boolType
+		case "JSON":
+			return jsonType
+		default:
+			return t
+		}
+	}
+
+	var traverse func(p string, message string, metaData *openapi3.SchemaRef, attrValue interface{}) string
+	traverse = func(p, message string, metaData *openapi3.SchemaRef, attrValue interface{}) string {
+		o := ""
+
+		switch metaData.Value.Type {
+		case "string":
+			payload := map[string]interface{}{
+				"parameter": strcase.UpperCamelCase(p),
+				"value":     fmt.Sprintf("%q", attrValue),
+			}
+			o = runTemplate("requestAttr", requestAttr, payload)
+		case "boolean":
+			payload := map[string]interface{}{
+				"parameter": strcase.UpperCamelCase(p),
+				"value":     attrValue.(bool),
+			}
+			o = runTemplate("requestAttr", requestAttr, payload)
+		case "number":
+			switch metaData.Value.Format {
+			case "int32", "int64", "float", "double":
+				payload := map[string]interface{}{
+					"parameter": strcase.UpperCamelCase(p),
+					"value":     attrValue,
+				}
+				o = runTemplate("requestAttr", requestAttr, payload)
+			}
+		case "array":
+			// TODO(daniel): with this approach, we lost the second item (if exists)
+			// see the contact/Create example, the phone has two items and with this
+			// approach we only populate one.
+
+			messageType := detectType2(serviceName, message, p)
+			for _, item := range attrValue.([]interface{}) {
+				switch item := item.(type) {
+				case map[string]interface{}:
+					payload := map[string]interface{}{
+						"service":   serviceName,
+						"message":   strcase.UpperCamelCase(messageType[0]),
+						"parameter": strcase.UpperCamelCase(p),
+					}
+					o = runTemplate("arrRequestAttr", arrRequestAttr, payload) + "{\n"
+					o += serviceName + "." + messageType[0] + ": {\n"
+					for k, v := range item {
+						for p, meta := range metaData.Value.Items.Value.Properties {
+							if k != p {
+								continue
+							}
+							o += traverse(p, messageType[0], meta, v) + ", "
+						}
+					}
+					o += "},\n"
+				default:
+					payload := map[string]interface{}{
+						"type":      typesMapper(messageType[0]),
+						"parameter": strcase.UpperCamelCase(p),
+					}
+					o = runTemplate("primitiveArrRequestAttr", primitiveArrRequestAttr, payload) + "{\n"
+					o += fmt.Sprintf("%q,\n", item)
+				}
+			}
+			o += "}"
+		case "object":
+			messageType := detectType2(serviceName, message, p)
+			payload := map[string]interface{}{
+				"service":   serviceName,
+				"message":   strcase.UpperCamelCase(messageType[0]),
+				"parameter": strcase.UpperCamelCase(p),
+			}
+			o += runTemplate("objRequestAttr", objRequestAttr, payload) + "{\n"
+			for at, va := range attrValue.(map[string]interface{}) {
+				for p, meta := range metaData.Value.Properties {
+					if p != at {
+						continue
+					}
+
+					o += traverse(p, messageType[0], meta, va) + ",\n"
+				}
+			}
+			o += "}"
+		default:
+			fmt.Println("*********** WE HAVE AN EXAMPLE THAT USES UNKOWN TYPE ***********")
+			fmt.Printf("In service |%v| endpoint |%v| parameter |%v|", serviceName, endpoint, p)
+		}
+		return o
+	}
+
+	output := []string{}
+
+	endpointSchema, ok := schemas[endpoint]
+	if !ok {
+		fmt.Printf("endpoint %v doesn't exist", endpoint)
+		os.Exit(1)
+	}
+
+	// loop through attributes of the request example
+	for attr, attrValue := range exa {
+		// loop through endpoint properties
+		for p, metaData := range endpointSchema.Value.Properties {
+			// we ignore property that is not included in the example
+			if p != attr {
+				continue
+			}
+
+			output = append(output, traverse(p, endpoint, metaData, attrValue)+",")
+		}
+
+	}
+
+	return strings.Join(output, "\n")
+}
