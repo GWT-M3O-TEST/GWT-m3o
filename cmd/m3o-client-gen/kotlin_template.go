@@ -81,7 +81,7 @@ package main
 
 const kotlinServiceTemplate = `
 {{- $service := .service }}
-package com.m3o.m3okotlin.services
+package com.m3o.m3okotlin.services.{{ $service.Name }}
 
 import com.m3o.m3okotlin.M3O.getUrl
 import com.m3o.m3okotlin.M3O.ktorHttpClient
@@ -120,15 +120,8 @@ object {{ title $service.Name }}Service {
 }
 
 {{- range $typeName, $schema := $service.Spec.Components.Schemas }}
-{{- $isResponse := isResponse $typeName }}
-{{- if not $isResponse }}
-@Serializable
-internal data class {{ title $service.Name}}{{ $typeName }}({{ recursiveTypeDefinitionKotlin $service.Name $typeName $service.Spec.Components.Schemas }})
-{{- end }}
-{{- if $isResponse }}
 @Serializable
 data class {{ title $service.Name}}{{ $typeName }}({{ recursiveTypeDefinitionKotlin $service.Name $typeName $service.Spec.Components.Schemas }})
-{{- end }}
 {{- end }}
 `
 
