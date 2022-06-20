@@ -127,20 +127,22 @@ data class {{ title $service.Name}}{{ $typeName }}({{ recursiveTypeDefinitionKot
 
 const kotlinExampleTemplate = `
 {{- $service := .service }}
-package examples.{{ $service.Name }}.{{ .endpoint }}
+{{- $endpoint := .endpoint }}
+package examples.{{ $service.Name }}.{{ $endpoint }}
 
 import com.m3o.m3okotlin.M3O
 import com.m3o.m3okotlin.services.{{ $service.Name }}
 
-{{- $reqType := requestType .endpoint }}
+{{- $reqType := requestType $endpoint }}
 {{- if isNotStream $service.Spec $service.Name $reqType }}
+
 suspend fun main() {
   M3O.initialize(System.getenv("M3O_API_TOKEN"))
 
-  val req = {{ title $service.Name }}{{ title .endpoint }}Request(name = "Jone")
+  val req = {{ title $service.Name }}{{ title $endpoint }}Request(name = "Jone")
   
   try {
-      val response = {{ title $service.Name }}Service.{{ .endpoint }}(req)
+      val response = {{ title $service.Name }}Service.{{ $endpoint }}(req)
       println(response)
   } catch (e: Exception) {
       println(e)
@@ -151,10 +153,10 @@ suspend fun main() {
 fun main() {
   M3O.initialize(System.getenv("M3O_API_TOKEN"))
 
-  val req = val req = {{ title $service.Name }}{{ title .endpoint }}Request(messages = 2, name = "John")
+  val req = val req = {{ title $service.Name }}{{ title $endpoint }}Request(messages = 2, name = "John")
   
   try {
-      val socket = {{ title $service.Name }}Service.{{ .endpoint }}(req) { socketError, response ->
+      val socket = {{ title $service.Name }}Service.{{ $endpoint }}(req) { socketError, response ->
           if (socketError == null) {
               println(response)
           } else {
