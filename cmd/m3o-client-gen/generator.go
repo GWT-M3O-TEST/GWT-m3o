@@ -110,7 +110,7 @@ func funcMap() map[string]interface{} {
 		// isEmptyRequest checks if the <ServiceName><Endpoint>Request is empty or has
 		// no attributes
 		"isEmptyRequest": func(endpoint string, schemas map[string]*openapi3.SchemaRef) bool {
-			protoMessage, ok := schemas[endpoint]
+			protoMessage, ok := schemas[endpoint+"Request"]
 			if !ok {
 				fmt.Printf("isEmptyRequest - the provided schemas doesn't contain %v\n", endpoint)
 				os.Exit(1)
