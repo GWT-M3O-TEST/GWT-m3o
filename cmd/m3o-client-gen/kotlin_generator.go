@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -305,14 +304,6 @@ func (k *kotlinG) ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, titl
 	if err != nil {
 		fmt.Println("Failed to append to schema file", err)
 		os.Exit(1)
-	}
-
-	if example.RunCheck && example.Idempotent {
-		err = ioutil.WriteFile(filepath.Join(examplesPath, "kotlin", serviceName, endpoint, title, ".run"), []byte{}, FILE_EXECUTE_PERMISSION)
-		if err != nil {
-			fmt.Println("Failed to write run file", err)
-			os.Exit(1)
-		}
 	}
 
 	// per endpoint dart readme examples
