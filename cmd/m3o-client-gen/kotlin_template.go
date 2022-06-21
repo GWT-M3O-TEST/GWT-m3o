@@ -24,18 +24,23 @@ object {{ title $service.Name }}Service {
 {{- $endpointName := requestTypeToEndpointName $key}}
 {{- if isNotStream $service.Spec $service.Name $reqType }}
 {{- $isEmptyRequest := isEmptyRequest $endpointName $service.Spec.Components.Schemas}}
-{{- if not $isEmptyRequest }}
+{{- $isEmptyResponse := isEmptyResponse $endpointName $service.Spec.Components.Schemas}}
+{{- if $isEmptyRequest }}
+    suspend fun {{ untitle $endpointName }}(): {{ title $service.Name}}{{ $endpointName }}Response {
+        return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) 
+    }
+{{- else if $isEmptyResponse }}
+    suspend fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request){
+      return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) {
+        body = req
+      }
+    }  
+{{- else if not $isEmptyRequest }}
     suspend fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request): {{ title $service.Name}}{{ $endpointName }}Response {
         return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) {
           body = req
         }
     }
-    {{- end }}
-    {{- if $isEmptyRequest }}
-    suspend fun {{ untitle $endpointName }}(): {{ title $service.Name}}{{ $endpointName }}Response {
-        return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) 
-    }
-{{- end }}
 {{- end }}
 {{- if isStream $service.Spec $service.Name $reqType }}
     fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request, action: (Exception?, {{ title $service.Name}}{{ $endpointName }}Response?) -> Unit) {
@@ -49,8 +54,17 @@ object {{ title $service.Name }}Service {
 }
 
 {{- range $typeName, $schema := $service.Spec.Components.Schemas }}
+{{- $isEmptyRequest := isEmptyRequest $endpointName $service.Spec.Components.Schemas}}
+{{- $isEmptyResponse := isEmptyResponse $endpointName $service.Spec.Components.Schemas}}
+{{- if $isEmptyRequest }}
+// generate nothing
+{{- else if $isEmptyResponse }}
+// generate nothing
+{{- end }}
+{{- else }}
 @Serializable
 data class {{ title $service.Name}}{{ $typeName }}({{ recursiveTypeDefinitionKotlin $service.Name $typeName $service.Spec.Components.Schemas }})
+{{- end }}
 {{- end }}
 `
 
