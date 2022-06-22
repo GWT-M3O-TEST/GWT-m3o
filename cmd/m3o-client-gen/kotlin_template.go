@@ -22,49 +22,52 @@ object {{ title $service.Name }}Service {
 {{- range $key, $req := $service.Spec.Components.RequestBodies }}
 {{- $reqType := requestType $key }}
 {{- $endpointName := requestTypeToEndpointName $key}}
-{{- if isNotStream $service.Spec $service.Name $reqType }}
-{{- $isEmptyRequest := isEmptyRequest $endpointName $service.Spec.Components.Schemas}}
-{{- $isEmptyResponse := isEmptyResponse $endpointName $service.Spec.Components.Schemas}}
-{{- if $isEmptyRequest }}
+  {{- if isNotStream $service.Spec $service.Name $reqType }}
+  {{- $isEmptyRequest := isEmptyRequest $reqType $service.Spec.Components.Schemas}}
+  {{- $isEmptyResponse := isEmptyResponse $reqType $service.Spec.Components.Schemas}}
+    {{- if $isEmptyRequest }}
     suspend fun {{ untitle $endpointName }}(): {{ title $service.Name}}{{ $endpointName }}Response {
         return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) 
     }
-{{- else if $isEmptyResponse }}
+    {{- else if $isEmptyResponse }}
     suspend fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request){
       return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) {
         body = req
       }
     }  
-{{- else if not $isEmptyRequest }}
+    {{- else if not $isEmptyRequest }}
     suspend fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request): {{ title $service.Name}}{{ $endpointName }}Response {
         return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) {
           body = req
         }
     }
-{{- end }}
-{{- if isStream $service.Spec $service.Name $reqType }}
+    {{- end }}
+  {{- end }}
+  {{- if isStream $service.Spec $service.Name $reqType }}
     fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request, action: (Exception?, {{ title $service.Name}}{{ $endpointName }}Response?) -> Unit) {
         val url = getUrl(SERVICE, "{{ $endpointName }}", true)
         WebSocket(url, Json.encodeToString(req)) { e, response ->
             action(e, if (response != null) Json.decodeFromString(response) else null)
         }.connect()
     }
-{{- end }}
+  {{- end }}
 {{- end }}
 }
 
 {{- range $typeName, $schema := $service.Spec.Components.Schemas }}
-{{- $isEmptyRequest := isEmptyRequest $endpointName $service.Spec.Components.Schemas}}
-{{- $isEmptyResponse := isEmptyResponse $endpointName $service.Spec.Components.Schemas}}
-{{- if $isEmptyRequest }}
-// generate nothing
-{{- else if $isEmptyResponse }}
-// generate nothing
-{{- end }}
-{{- else }}
+  {{- if isObject $typeName }}
 @Serializable
-data class {{ title $service.Name}}{{ $typeName }}({{ recursiveTypeDefinitionKotlin $service.Name $typeName $service.Spec.Components.Schemas }})
-{{- end }}
+data class {{ title $service.Name}}{{ title $typeName }}({{ recursiveTypeDefinitionKotlin $service.Name $typeName $service.Spec.Components.Schemas }})
+  {{- else if (isEmptyRequest $typeName $service.Spec.Components.Schemas) }}
+@Serializable
+class {{ title $service.Name}}{{ title $typeName }}({{ recursiveTypeDefinitionKotlin $service.Name $typeName $service.Spec.Components.Schemas }})
+  {{- else if (isEmptyResponse $typeName $service.Spec.Components.Schemas) }}
+@Serializable
+class {{ title $service.Name}}{{ title $typeName }}({{ recursiveTypeDefinitionKotlin $service.Name $typeName $service.Spec.Components.Schemas }})
+  {{- else }}
+@Serializable
+data class {{ title $service.Name}}{{ title $typeName }}({{ recursiveTypeDefinitionKotlin $service.Name $typeName $service.Spec.Components.Schemas }})  
+  {{- end }}
 {{- end }}
 `
 

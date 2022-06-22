@@ -102,34 +102,47 @@ func funcMap() map[string]interface{} {
 		"isNotStream": func(spec *openapi3.Swagger, serviceName, requestType string) bool {
 			return !isStream(spec, serviceName, requestType)
 		},
+		// return true if typeName has 'Response' as suffix.
+		// this is primarily used in dart template.
 		"isResponse": func(typeName string) bool {
-			// return true if typeName has 'Response' as suffix.
-			// this is primarily used in dart template.
 			return strings.HasSuffix(typeName, "Response")
 		},
+		"isRequest": func(typeName string) bool {
+			return strings.HasSuffix(typeName, "Request")
+		},
+		// isObject returns true if typeName has no Request nor Response as suffix
+		"isObject": func(typeName string) bool {
+			return !strings.HasSuffix(typeName, "Request") && !strings.HasSuffix(typeName, "Response")
+		},
 		// isEmptyRequest checks if the <ServiceName><Endpoint>Request is empty or has
-		// no attributes
+		// no attributes. endpoint value example: HellworldCallRequest
 		"isEmptyRequest": func(endpoint string, schemas map[string]*openapi3.SchemaRef) bool {
-			finalEndpoint := endpoint + "Request"
-			protoMessage, ok := schemas[finalEndpoint]
-			if !ok {
-				fmt.Printf("isEmptyRequest - the provided schemas doesn't contain %v\n", finalEndpoint)
-				os.Exit(1)
-			}
+			// make sure that endpoint is a Request first
+			if strings.HasSuffix(endpoint, "Request") {
+				protoMessage, ok := schemas[endpoint]
+				if !ok {
+					fmt.Printf("isEmptyRequest - the provided schemas doesn't contain %v\n", endpoint)
+					os.Exit(1)
+				}
 
-			return len(protoMessage.Value.Properties) == 0
+				return len(protoMessage.Value.Properties) == 0
+			}
+			return false
 		},
 		// isEmptyResponse checks if the <ServiceName><Endpoint>Response is empty or has
-		// no attributes
+		// no attributes. endpoint value example: HellworldCallResponse
 		"isEmptyResponse": func(endpoint string, schemas map[string]*openapi3.SchemaRef) bool {
-			finalEndpoint := endpoint + "Response"
-			protoMessage, ok := schemas[finalEndpoint]
-			if !ok {
-				fmt.Printf("isEmptyResponse - the provided schemas doesn't contain %v\n", finalEndpoint)
-				os.Exit(1)
-			}
+			// make sure that endpoint is a Response first
+			if strings.HasSuffix(endpoint, "Response") {
+				protoMessage, ok := schemas[endpoint]
+				if !ok {
+					fmt.Printf("isEmptyResponse - the provided schemas doesn't contain %v\n", endpoint)
+					os.Exit(1)
+				}
 
-			return len(protoMessage.Value.Properties) == 0
+				return len(protoMessage.Value.Properties) == 0
+			}
+			return false
 		},
 		// Similar to isStream, this function checks if a service has
 		// a stream endpoint or not
