@@ -69,35 +69,6 @@ func funcMap() map[string]interface{} {
 		"isCustomShell": func(ex example) bool {
 			return len(ex.ShellRequest) > 0
 		},
-		"recursiveTypeDefinitionGo": func(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
-			gog := &goG{}
-			return gog.schemaToType(serviceName, typeName, schemas)
-		},
-		"recursiveTypeDefinitionTs": func(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
-			tsg := &tsG{}
-			return tsg.schemaToType(serviceName, typeName, schemas)
-		},
-		"recursiveTypeDefinitionDart": func(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
-			dartg := &dartG{}
-			return dartg.schemaToType(serviceName, typeName, schemas)
-		},
-		"recursiveTypeDefinitionKotlin": func(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
-			kotling := &kotlinG{}
-			return kotling.schemaToType(serviceName, typeName, schemas)
-		},
-		"requestTypeToEndpointName": func(requestType string) string {
-			parts := camelcase.Split(requestType)
-			return strings.Join(parts[1:len(parts)-1], "")
-		},
-		// strips service name from the request type
-		"requestType": func(requestType string) string {
-			// @todo hack to support examples
-			if strings.ToLower(requestType[0:1]) == requestType[0:1] {
-				return strings.ToTitle(requestType[0:1]) + requestType[1:] + "Request"
-			}
-			parts := camelcase.Split(requestType)
-			return strings.Join(parts[1:], "")
-		},
 		"isStream": isStream,
 		"isNotStream": func(spec *openapi3.Swagger, serviceName, requestType string) bool {
 			return !isStream(spec, serviceName, requestType)
@@ -144,6 +115,57 @@ func funcMap() map[string]interface{} {
 			}
 			return false
 		},
+		// checkEmptyClassKotlin is helper function used in kotlin template
+		"checkEmptyClassKotlin": func(req, res bool) string {
+			if req && res {
+				return "BOTH_EMPTY"
+			} else if req && !res {
+				return "REQ_EMPTY_RES_NOT_EMPTY"
+			} else if !req && res {
+				return "REQ_NOT_EMPTY_RES_EMPTY"
+			} else {
+				return "OOOPPPSSS"
+			}
+		},
+		"recursiveTypeDefinitionGo": func(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
+			gog := &goG{}
+			return gog.schemaToType(serviceName, typeName, schemas)
+		},
+		"recursiveTypeDefinitionTs": func(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
+			tsg := &tsG{}
+			return tsg.schemaToType(serviceName, typeName, schemas)
+		},
+		"recursiveTypeDefinitionDart": func(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
+			dartg := &dartG{}
+			return dartg.schemaToType(serviceName, typeName, schemas)
+		},
+		"recursiveTypeDefinitionKotlin": func(serviceName, typeName string, schemas map[string]*openapi3.SchemaRef) string {
+			kotling := &kotlinG{}
+			return kotling.schemaToType(serviceName, typeName, schemas)
+		},
+		"requestTypeToEndpointName": func(requestType string) string {
+			parts := camelcase.Split(requestType)
+			return strings.Join(parts[1:len(parts)-1], "")
+		},
+		"requestTypeToEndpointPath": func(requestType string) string {
+			parts := camelcase.Split(requestType)
+			return strings.Title(strings.Join(parts[1:len(parts)-1], ""))
+		},
+		// strips service name from the request type
+		"requestType": func(requestType string) string {
+			// @todo hack to support examples
+			if strings.ToLower(requestType[0:1]) == requestType[0:1] {
+				return strings.ToTitle(requestType[0:1]) + requestType[1:] + "Request"
+			}
+			parts := camelcase.Split(requestType)
+			return strings.Join(parts[1:], "")
+		},
+		// getEndpoint strips Request/Response from the key for example
+		// CallRequest -> Call
+		"getEndpoint": func(key string) string {
+			parts := camelcase.Split(key)
+			return strings.Join(parts[0:len(parts)-1], "")
+		},
 		// Similar to isStream, this function checks if a service has
 		// a stream endpoint or not
 		"serviceHasStream": func(spec *openapi3.Swagger, service string) bool {
@@ -188,10 +210,6 @@ func funcMap() map[string]interface{} {
 				ret += strings.TrimSpace(line) + "\n"
 			}
 			return ret
-		},
-		"requestTypeToEndpointPath": func(requestType string) string {
-			parts := camelcase.Split(requestType)
-			return strings.Title(strings.Join(parts[1:len(parts)-1], ""))
 		},
 		"title": strings.Title,
 		"untitle": func(t string) string {

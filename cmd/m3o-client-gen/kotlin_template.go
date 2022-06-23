@@ -19,39 +19,38 @@ import kotlinx.serialization.Serializable
 private const val SERVICE = "{{ $service.Name }}"
 
 object {{ title $service.Name }}Service {
-{{- range $key, $req := $service.Spec.Components.RequestBodies }}
-{{- $reqType := requestType $key }}
-{{- $endpointName := requestTypeToEndpointName $key}}
-  {{- if isNotStream $service.Spec $service.Name $reqType }}
-  {{- $isEmptyRequest := isEmptyRequest $reqType $service.Spec.Components.Schemas}}
-  {{- $isEmptyResponse := isEmptyResponse $reqType $service.Spec.Components.Schemas}}
-    {{- if $isEmptyRequest }}
-    suspend fun {{ untitle $endpointName }}(): {{ title $service.Name}}{{ $endpointName }}Response {
+  {{- range $key, $value := $service.Spec.Components.RequestBodies }}
+  {{- $requestType := requestType $key}}
+  {{- $endpointName := getEndpoint $requestType }}
+    {{- if isNotStream $service.Spec $service.Name $endpointName }}
+    {{- $req := print $endpointName  "Request"}}
+    {{- $res := print $endpointName  "Response"}}
+      {{- if eq (checkEmptyClassKotlin (isEmptyRequest $req $service.Spec.Components.Schemas) (isEmptyResponse $res $service.Spec.Components.Schemas)) "REQ_EMPTY_RES_NOT_EMPTY" }}
+      suspend fun {{ untitle $endpointName }}(): {{ title $service.Name}}{{ $endpointName }}Response {
         return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) 
-    }
-    {{- else if $isEmptyResponse }}
-    suspend fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request){
-      return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) {
-        body = req
       }
-    }  
-    {{- else if not $isEmptyRequest }}
-    suspend fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request): {{ title $service.Name}}{{ $endpointName }}Response {
+      {{- else if eq (checkEmptyClassKotlin (isEmptyRequest $req $service.Spec.Components.Schemas) (isEmptyResponse $res $service.Spec.Components.Schemas)) "REQ_NOT_EMPTY_RES_EMPTY"  }}
+      suspend fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request){
         return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) {
           body = req
         }
-    }
+      }  
+      {{- else }}
+      suspend fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request): {{ title $service.Name}}{{ $endpointName }}Response {
+        return ktorHttpClient.post(getUrl(SERVICE, "{{ $endpointName }}")) {
+          body = req
+        }
+      }  
+      {{- end }}
+    {{- else if isStream $service.Spec $service.Name $endpointName }}
+      fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request, action: (Exception?, {{ title $service.Name}}{{ $endpointName }}Response?) -> Unit) {
+          val url = getUrl(SERVICE, "{{ $endpointName }}", true)
+          WebSocket(url, Json.encodeToString(req)) { e, response ->
+              action(e, if (response != null) Json.decodeFromString(response) else null)
+          }.connect()
+      }
     {{- end }}
   {{- end }}
-  {{- if isStream $service.Spec $service.Name $reqType }}
-    fun {{ untitle $endpointName }}(req: {{ title $service.Name}}{{ $endpointName }}Request, action: (Exception?, {{ title $service.Name}}{{ $endpointName }}Response?) -> Unit) {
-        val url = getUrl(SERVICE, "{{ $endpointName }}", true)
-        WebSocket(url, Json.encodeToString(req)) { e, response ->
-            action(e, if (response != null) Json.decodeFromString(response) else null)
-        }.connect()
-    }
-  {{- end }}
-{{- end }}
 }
 
 {{- range $typeName, $schema := $service.Spec.Components.Schemas }}
@@ -59,11 +58,7 @@ object {{ title $service.Name }}Service {
 @Serializable
 data class {{ title $service.Name}}{{ title $typeName }}({{ recursiveTypeDefinitionKotlin $service.Name $typeName $service.Spec.Components.Schemas }})
   {{- else if (isEmptyRequest $typeName $service.Spec.Components.Schemas) }}
-@Serializable
-class {{ title $service.Name}}{{ title $typeName }}({{ recursiveTypeDefinitionKotlin $service.Name $typeName $service.Spec.Components.Schemas }})
   {{- else if (isEmptyResponse $typeName $service.Spec.Components.Schemas) }}
-@Serializable
-class {{ title $service.Name}}{{ title $typeName }}({{ recursiveTypeDefinitionKotlin $service.Name $typeName $service.Spec.Components.Schemas }})
   {{- else }}
 @Serializable
 data class {{ title $service.Name}}{{ title $typeName }}({{ recursiveTypeDefinitionKotlin $service.Name $typeName $service.Spec.Components.Schemas }})  
@@ -85,7 +80,7 @@ import com.m3o.m3okotlin.services.{{ $service.Name }}
 suspend fun main() {
   M3O.initialize(System.getenv("M3O_API_TOKEN"))
 
-  val req = {{ title $service.Name }}{{ title $endpoint }}Request(name = "Jone")
+  val req = {{ title $service.Name }}{{ title $endpoint }}Request({{ kotlinExampleRequest $service.Name .endpoint $service.Spec.Components.Schemas .example.Request }})
   
   try {
       val response = {{ title $service.Name }}Service.{{ $endpoint }}(req)
@@ -99,7 +94,7 @@ suspend fun main() {
 fun main() {
   M3O.initialize(System.getenv("M3O_API_TOKEN"))
 
-  val req = val req = {{ title $service.Name }}{{ title $endpoint }}Request(messages = 2, name = "John")
+  val req = val req = {{ title $service.Name }}{{ title $endpoint }}Request({{ kotlinExampleRequest $service.Name .endpoint $service.Spec.Components.Schemas .example.Request }})
   
   try {
       val socket = {{ title $service.Name }}Service.{{ $endpoint }}(req) { socketError, response ->

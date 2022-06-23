@@ -341,17 +341,17 @@ func (k *kotlinG) ExampleAndReadmeEdit(examplesPath, serviceName, endpoint, titl
 }
 
 func schemaToKotlinExample(serviceName, endpoint string, schemas map[string]*openapi3.SchemaRef, exa map[string]interface{}) string {
-	var requestAttr = `{{ .parameter }}: {{ .value }}`
-	var primitiveArrRequestAttr = `{{ .parameter }}: []{{ .type }}`
+	var requestAttr = `{{ .parameter }} = {{ .value }}`
+	var primitiveArrRequestAttr = `{{ .parameter }} = listOf({{ .type }})`
 	var arrRequestAttr = `{{ .parameter }}: []{{ .service }}.{{ .message }}`
 	var objRequestAttr = `{{ .parameter }}: &{{ .service }}.{{ .message }}`
-	var jsonType = "map[string]interface{}"
-	var stringType = "string"
-	var int32Type = "int32"
-	var int64Type = "int64"
-	var floatType = "float32"
-	var doubleType = "float64"
-	var boolType = "bool"
+	var jsonType = "Map<String, dynamic>"
+	var stringType = "String"
+	var int32Type = "Int"
+	var int64Type = "Long"
+	var floatType = "Float"
+	var doubleType = "Double"
+	var boolType = "Boolean"
 
 	runTemplate := func(tmpName, temp string, payload map[string]interface{}) string {
 		t, err := template.New(tmpName).Parse(temp)
