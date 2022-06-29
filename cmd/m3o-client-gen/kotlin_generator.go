@@ -63,7 +63,7 @@ func (k *kotlinG) schemaToType(serviceName, typeName string, schemas map[string]
 	var arrayType = `val {{ .parameter }}: List<{{ .type }}>`
 	var mapType = `val {{ .parameter }}: Map<{{ .type1 }}, {{ .type2 }}>`
 	var anyType = `dynamic {{ .parameter }}`
-	var jsonType = "Map<String, dynamic>"
+	var jsonType = "Map<String, Any>"
 	var stringType = "String"
 	var int32Type = "Int"
 	var int64Type = "Long"
@@ -168,14 +168,30 @@ func (k *kotlinG) schemaToType(serviceName, typeName string, schemas map[string]
 			}
 		case "array":
 			types := detectType2(serviceName, typeName, p)
-			payload := map[string]interface{}{
-				"type":      strings.Title(serviceName) + typesMapper(types[0]),
-				"parameter": p,
+			if types[0] == typesMapper(types[0]) {
+				// a Message Type, so we prefix it with service name
+				payload := map[string]interface{}{
+					"type":      strings.Title(serviceName) + typesMapper(types[0]),
+					"parameter": p,
+				}
+				o = runTemplate("array", arrayType, payload)
+			} else {
+				payload := map[string]interface{}{
+					"type":      typesMapper(types[0]),
+					"parameter": p,
+				}
+				o = runTemplate("array", arrayType, payload)
 			}
-			o = runTemplate("array", arrayType, payload)
 		case "object":
 			types := detectType2(serviceName, typeName, p)
-			if len(types) == 1 {
+			if len(types) == 1 && types[0] == "JSON" {
+				// a JSON
+				payload := map[string]interface{}{
+					"type":      typesMapper(types[0]),
+					"parameter": p,
+				}
+				o = runTemplate("jsonType", jsonType, payload)
+			} else if len(types) == 1 {
 				// a Message Type
 				payload := map[string]interface{}{
 					"type":      strings.Title(serviceName) + typesMapper(types[0]),
