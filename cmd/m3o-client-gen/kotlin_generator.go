@@ -187,10 +187,11 @@ func (k *kotlinG) schemaToType(serviceName, typeName string, schemas map[string]
 			if len(types) == 1 && types[0] == "JSON" {
 				// a JSON
 				payload := map[string]interface{}{
-					"type":      typesMapper(types[0]),
+					"type1":     "String",
+					"type2":     "Any",
 					"parameter": p,
 				}
-				o = runTemplate("jsonType", jsonType, payload)
+				o = runTemplate("jsonType", mapType, payload)
 			} else if len(types) == 1 {
 				// a Message Type
 				payload := map[string]interface{}{
