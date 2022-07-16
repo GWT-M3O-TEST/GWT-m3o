@@ -19,7 +19,7 @@ import kotlinx.serialization.json.JsonObject
 
 private const val SERVICE = "{{ $service.Name }}"
 
-object {{ title $service.Name }}Service {
+object {{ title $service.Name }}Serv {
   {{- range $key, $value := $service.Spec.Components.RequestBodies }}
   {{- $requestType := requestType $key}}
   {{- $endpointName := getEndpoint $requestType }}
@@ -84,7 +84,7 @@ suspend fun main() {
   val req = {{ title $service.Name }}{{ title $endpoint }}Request({{ kotlinExampleRequest $service.Name .endpoint $service.Spec.Components.Schemas .example.Request }})
   
   try {
-      val response = {{ title $service.Name }}Service.{{ $endpoint }}(req)
+      val response = {{ title $service.Name }}Serv.{{ $endpoint }}(req)
       println(response)
   } catch (e: Exception) {
       println(e)
@@ -98,7 +98,7 @@ fun main() {
   val req = val req = {{ title $service.Name }}{{ title $endpoint }}Request({{ kotlinExampleRequest $service.Name .endpoint $service.Spec.Components.Schemas .example.Request }})
   
   try {
-      val socket = {{ title $service.Name }}Service.{{ $endpoint }}(req) { socketError, response ->
+      val socket = {{ title $service.Name }}Serv.{{ $endpoint }}(req) { socketError, response ->
           if (socketError == null) {
               println(response)
           } else {
