@@ -118,6 +118,15 @@ func (k *kotlinG) schemaToType(serviceName, typeName string, schemas map[string]
 
 	for p, meta := range protoMessage.Value.Properties {
 		// comments := "/**" + "\n"
+
+		// we use this to prevent using names that are reserved keywords in Kotlin
+		reservedWord := []string{}
+
+		if p == "object" {
+			reservedWord = append(reservedWord, p)
+			p = "obj"
+		}
+
 		o := ""
 
 		// if meta.Value.Description != "" {
@@ -167,7 +176,13 @@ func (k *kotlinG) schemaToType(serviceName, typeName string, schemas map[string]
 				o = runTemplate("normal", normalType, payload)
 			}
 		case "array":
-			types := detectType2(serviceName, typeName, p)
+			var types []string
+			if len(reservedWord) == 0 {
+				types = detectType2(serviceName, typeName, p)
+			} else {
+				types = detectType2(serviceName, typeName, reservedWord[0])
+			}
+
 			if types[0] == typesMapper(types[0]) {
 				// a Message Type, so we prefix it with service name
 				payload := map[string]interface{}{
@@ -183,7 +198,13 @@ func (k *kotlinG) schemaToType(serviceName, typeName string, schemas map[string]
 				o = runTemplate("array", arrayType, payload)
 			}
 		case "object":
-			types := detectType2(serviceName, typeName, p)
+			var types []string
+			if len(reservedWord) == 0 {
+				types = detectType2(serviceName, typeName, p)
+			} else {
+				types = detectType2(serviceName, typeName, reservedWord[0])
+			}
+
 			if len(types) == 1 && types[0] == "JSON" {
 				// a JSON
 				payload := map[string]interface{}{
@@ -410,6 +431,14 @@ func schemaToKotlinExample(serviceName, endpoint string, schemas map[string]*ope
 	traverse = func(p, message string, metaData *openapi3.SchemaRef, attrValue interface{}) string {
 		o := ""
 
+		// we use this to prevent using names that are reserved keywords in Kotlin
+		reservedWord := []string{}
+
+		if p == "object" {
+			reservedWord = append(reservedWord, p)
+			p = "obj"
+		}
+
 		switch metaData.Value.Type {
 		case "string":
 			payload := map[string]interface{}{
@@ -433,11 +462,13 @@ func schemaToKotlinExample(serviceName, endpoint string, schemas map[string]*ope
 				o = runTemplate("requestAttr", requestAttr, payload)
 			}
 		case "array":
-			// TODO(daniel): with this approach, we lost the second item (if exists)
-			// see the contact/Create example, the phone has two items and with this
-			// approach we only populate one.
+			var messageType []string
+			if len(reservedWord) == 0 {
+				messageType = detectType2(serviceName, message, p)
+			} else {
+				messageType = detectType2(serviceName, message, reservedWord[0])
+			}
 
-			messageType := detectType2(serviceName, message, p)
 			for _, item := range attrValue.([]interface{}) {
 				switch item := item.(type) {
 				case map[string]interface{}:
@@ -468,7 +499,13 @@ func schemaToKotlinExample(serviceName, endpoint string, schemas map[string]*ope
 			}
 			o += "}"
 		case "object":
-			messageType := detectType2(serviceName, message, p)
+			var messageType []string
+			if len(reservedWord) == 0 {
+				messageType = detectType2(serviceName, message, p)
+			} else {
+				messageType = detectType2(serviceName, message, reservedWord[0])
+			}
+
 			payload := map[string]interface{}{
 				"service":   serviceName,
 				"message":   strcase.UpperCamelCase(messageType[0]),
