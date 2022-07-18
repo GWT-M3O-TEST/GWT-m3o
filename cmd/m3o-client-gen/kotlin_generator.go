@@ -59,9 +59,9 @@ func (k *kotlinG) schemaToType(serviceName, typeName string, schemas map[string]
 	// @JsonKey(fromJson: int64FromString, toJson: int64ToString)
 	// {{ .type }}? {{ .parameter }}
 	// `
-	var normalType = `val {{ .parameter }}: {{ .type }}`
-	var arrayType = `val {{ .parameter }}: List<{{ .type }}>`
-	var mapType = `val {{ .parameter }}: Map<{{ .type1 }}, {{ .type2 }}>`
+	var normalType = `val {{ .parameter }}: {{ .type }}? = null`
+	var arrayType = `val {{ .parameter }}: List<{{ .type }}>? = null`
+	var mapType = `val {{ .parameter }}: Map<{{ .type1 }}, {{ .type2 }}>? = null`
 	var anyType = `dynamic {{ .parameter }}`
 	var jsonType = "JsonObject"
 	var stringType = "String"
